@@ -1,0 +1,9 @@
+tools/
+Dockerfile
+docker-compose.yml
+deploy.sh
+README.md
+.dockerignore
+.git
+.gitignore
+*.log

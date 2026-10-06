@@ -1,0 +1,27 @@
+# 换行符策略：仓库里一律存 LF，避免 Windows 提交后 Linux 上出问题。
+#
+# 背景：本机 git 的 core.autocrlf=true，而部署目标是 Linux。
+# 没有这个文件时，一旦哪天 autocrlf 被关掉，deploy.sh 会以 CRLF 进仓库，
+# 在服务器上执行会报 “bash\r: No such file or directory”。
+
+* text=auto
+
+# shell 脚本强制 LF —— 这是唯一一个「行尾错了就彻底跑不起来」的文件类型
+*.sh text eol=lf
+
+# 静态资源与图片不做换行转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff  binary
+*.woff2 binary
+
+# 生成物：让 diff 干净些，但依然正常显示行级差异
+public/problems.js text eol=lf
+*.html text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.conf text eol=lf

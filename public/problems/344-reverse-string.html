@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>344.反转字符串 · 变量可视化</title>
+  <style>
+    :root { --bg:#07111f; --panel:#0e1b2e; --panel2:#13233a; --line:#27425f; --text:#e9f2ff; --muted:#9fb3ca; --blue:#55b7ff; --orange:#ffb45b; --green:#6fe3a2; --pink:#ff7eac; --shadow:0 16px 42px rgba(0,0,0,.28); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 12% 0%,#15304d 0,#07111f 45%,#050b14 100%); font:15px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
+    .wrap { max-width:1180px; margin:0 auto; padding:30px 22px 42px; }
+    h1 { margin:0; font-size:clamp(25px,4vw,40px); letter-spacing:.02em; }
+    .sub { margin:8px 0 26px; color:var(--muted); }
+    .toolbar { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:end; padding:16px; background:rgba(14,27,46,.88); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); }
+    label { color:var(--muted); font-size:13px; display:flex; flex-direction:column; gap:6px; }
+    input { width:min(390px,72vw); padding:10px 12px; border-radius:10px; border:1px solid #3a5a79; background:#091525; color:var(--text); font:inherit; outline:none; }
+    input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(85,183,255,.18); }
+    button { border:1px solid #3a5a79; background:#162a43; color:var(--text); border-radius:10px; padding:10px 14px; font:inherit; cursor:pointer; transition:.16s ease; }
+    button:hover { transform:translateY(-1px); border-color:var(--blue); background:#1b3858; }
+    button.primary { background:linear-gradient(135deg,#218ed0,#3564d5); border-color:#66c4ff; }
+    button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    .layout { margin-top:18px; display:grid; grid-template-columns:1.08fr .92fr; gap:18px; }
+    .panel { background:rgba(14,27,46,.9); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:18px; }
+    .panel h2 { margin:0 0 14px; font-size:17px; }
+    .code { margin:0; padding:15px; border-radius:12px; overflow:auto; background:#07111d; border:1px solid #1e3854; color:#c9d8eb; font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    .line { display:block; padding:0 9px; border-left:3px solid transparent; white-space:pre; }
+    .line.active { background:rgba(85,183,255,.14); border-left-color:var(--blue); color:#fff; }
+    .kw { color:#c792ea; } .fn { color:#82aaff; } .num { color:#f78c6c; } .comment { color:#6e879e; }
+    .array { display:flex; flex-wrap:wrap; gap:8px; min-height:82px; align-items:center; padding:16px; border-radius:14px; background:#091525; border:1px solid #24415e; }
+    .cell { position:relative; width:52px; height:58px; display:flex; align-items:center; justify-content:center; border:1px solid #3f6285; border-radius:10px; background:#132943; font-size:22px; font-weight:600; transition:.25s ease; }
+    .cell.swap { background:rgba(255,180,91,.2); border-color:var(--orange); color:#ffd59e; transform:translateY(-4px); }
+    .index { position:absolute; left:0; right:0; bottom:-21px; text-align:center; color:var(--muted); font-size:12px; font-weight:400; }
+    .pointer { position:absolute; top:-25px; font-size:12px; font-weight:700; }
+    .pointer.left { color:var(--blue); } .pointer.right { color:var(--pink); }
+    .vars { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:18px; }
+    .var { padding:13px; border-radius:12px; background:var(--panel2); border:1px solid #2a4867; }
+    .var .name { color:var(--muted); font:12px ui-monospace,monospace; } .var .value { margin-top:4px; font:600 25px ui-monospace,monospace; }
+    .leftv { color:var(--blue); } .rightv { color:var(--pink); } .stepv { color:var(--green); } .statusv { color:var(--orange); font-size:17px!important; }
+    .progress { height:7px; margin:18px 0 7px; border-radius:99px; background:#20354e; overflow:hidden; }
+    .bar { height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--green)); transition:.25s; }
+    .legend { display:flex; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:12px; margin-top:11px; }
+    .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; } .db{background:var(--blue)} .dp{background:var(--pink)} .do{background:var(--orange)}
+    .history { margin-top:16px; max-height:198px; overflow:auto; display:flex; flex-direction:column; gap:7px; }
+    .event { padding:9px 11px; border-left:3px solid var(--green); background:#0b1a2b; border-radius:7px; color:#c8d9eb; font-size:13px; }
+    .empty { color:var(--muted); font-size:13px; }
+    @media (max-width:820px) { .layout { grid-template-columns:1fr; } }
+    @media (max-width:520px) { .wrap{padding:22px 14px 34px}.toolbar{align-items:stretch} input{width:100%} .toolbar label{width:100%} button{flex:1}.cell{width:45px;height:52px} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>344. 反转字符串</h1>
+    <p class="sub">观察 <code>left</code>、<code>right</code> 与字符数组在每一步如何变化</p>
+    <section class="toolbar" aria-label="控制区">
+      <label>输入字符数组（直接输入字符串）<input id="input" value="hello" maxlength="32" aria-label="输入字符串" /></label>
+      <button id="reset">重置</button><button id="step" class="primary">单步执行</button><button id="play">▶ 自动播放</button>
+    </section>
+    <div class="layout">
+      <section class="panel"><h2>代码执行位置</h2>
+        <pre class="code" aria-label="Python 源码"><span class="line" data-line="1"><span class="kw">class</span> Solution:</span><span class="line" data-line="2">    <span class="kw">def</span> <span class="fn">reverseString</span>(self, s: List[str]):</span><span class="line" data-line="3">        <span class="comment"># 原地修改 s，不返回结果</span></span><span class="line" data-line="4">        left, right = <span class="num">0</span>, <span class="fn">len</span>(s) - <span class="num">1</span></span><span class="line" data-line="5">        <span class="kw">while</span> left &lt; right:</span><span class="line" data-line="6">            s[left], s[right] = s[right], s[left]</span><span class="line" data-line="7">            left += <span class="num">1</span></span><span class="line" data-line="8">            right -= <span class="num">1</span></span></pre>
+      </section>
+      <section class="panel"><h2>变量与数组</h2><div id="array" class="array" aria-live="polite"></div>
+        <div class="vars"><div class="var"><div class="name">left</div><div id="left" class="value leftv">0</div></div><div class="var"><div class="name">right</div><div id="right" class="value rightv">0</div></div><div class="var"><div class="name">step</div><div id="stepNo" class="value stepv">0</div></div><div class="var"><div class="name">状态</div><div id="status" class="value statusv">准备开始</div></div></div>
+        <div class="progress" aria-label="执行进度"><div id="bar" class="bar"></div></div><div id="progressText" class="legend">0 / 0 次交换</div>
+        <div class="legend"><span><i class="dot db"></i>left 指针</span><span><i class="dot dp"></i>right 指针</span><span><i class="dot do"></i>本次交换</span></div>
+        <div id="history" class="history" aria-live="polite"><div class="empty">点击“单步执行”查看变量变化</div></div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const $ = id => document.getElementById(id);
+    const input = $('input'), arrayEl = $('array'), leftEl = $('left'), rightEl = $('right'), stepEl = $('stepNo'), statusEl = $('status'), barEl = $('bar'), progressText = $('progressText'), historyEl = $('history');
+    let state = { chars:[], left:0, right:-1, step:0, swaps:0, done:false, last:null }, timer = null;
+    function makeState(){ const chars = Array.from(input.value || ''); state = { chars, left:0, right:chars.length-1, step:0, swaps:Math.floor(chars.length/2), done:chars.length<2, last:null }; render(); }
+    function render(){
+      arrayEl.innerHTML=''; state.chars.forEach((ch,i)=>{ const cell=document.createElement('div'); cell.className='cell'+(state.last && (i===state.last[0]||i===state.last[1])?' swap':''); cell.textContent=ch || '␠'; cell.setAttribute('aria-label',`索引 ${i}：${ch||'空格'}`); const idx=document.createElement('span'); idx.className='index'; idx.textContent=i; cell.append(idx); if(i===state.left && !state.done){const p=document.createElement('span');p.className='pointer left';p.textContent='left';cell.append(p);} if(i===state.right && !state.done){const p=document.createElement('span');p.className='pointer right';p.textContent='right';cell.append(p);} arrayEl.append(cell); });
+      leftEl.textContent=state.left; rightEl.textContent=state.right<0?'—':state.right; stepEl.textContent=state.step; statusEl.textContent=state.done?'已完成':(state.last?'刚刚交换':'准备开始'); const ratio=state.swaps?Math.min(100,state.step/state.swaps*100):100; barEl.style.width=ratio+'%'; progressText.textContent=`${Math.min(state.step,state.swaps)} / ${state.swaps} 次交换`; document.querySelectorAll('.line').forEach(x=>x.classList.toggle('active',x.dataset.line=== (state.done?'5':state.last?'6':'4')));
+    }
+    function addHistory(text){ if(historyEl.querySelector('.empty')) historyEl.innerHTML=''; const e=document.createElement('div'); e.className='event'; e.textContent=text; historyEl.prepend(e); }
+    function step(){ if(state.done) return; state.last=null; if(state.left<state.right){ const a=state.left,b=state.right; [state.chars[a],state.chars[b]]=[state.chars[b],state.chars[a]]; state.left++; state.right--; state.step++; state.last=[a,b]; addHistory(`第 ${state.step} 次：交换索引 ${a} 与 ${b}，left → ${state.left}，right → ${state.right}`); if(state.left>=state.right) state.done=true; } else state.done=true; render(); if(state.done && timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';} }
+    $('reset').onclick=()=>{ if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';} makeState(); historyEl.innerHTML='<div class="empty">点击“单步执行”查看变量变化</div>'; };
+    $('step').onclick=step; input.addEventListener('input',()=>{ if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';} makeState(); historyEl.innerHTML='<div class="empty">点击“单步执行”查看变量变化</div>'; });
+    $('play').onclick=()=>{ if(state.done) makeState(); if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';}else{ $('play').textContent='⏸ 暂停'; timer=setInterval(step,700); } };
+    makeState();
+  </script>
+</body>
+</html>

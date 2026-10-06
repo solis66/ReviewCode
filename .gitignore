@@ -1,0 +1,17 @@
+# 本地预览 / 构建的中间产物
+.verify/
+*.log
+
+# Python 缓存（build.py 会产生）
+__pycache__/
+*.pyc
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# 本地覆盖用的 compose 片段（避免把本机端口/路径改动的提交上去）
+docker-compose.override.yml
