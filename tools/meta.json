@@ -74,6 +74,21 @@
       "theme": "light",
       "summary": "先构造 next 前缀表，再让主串指针 i 只前进不回退，直观看到每一次失配时 j 的回退落点。",
       "complexity": "时间 O(n+m) · 空间 O(m)"
-    }
+    },
+    "leetcode.459.重复的子字符串_算法逻辑原理动画展示静态网页.html": {
+      "id": "leetcode-459-repeated-substring",
+      "order": 5,
+      "no": "459",
+      "platform": "LeetCode",
+      "title": "重复的子字符串",
+      "subtitle": "KMP next 表演示",
+      "category": "字符串 · KMP",
+      "tags": ["KMP", "next 前缀表"],
+      "level": "简单",
+      "language": "Java",
+      "theme": "light",
+      "summary": "构造 next 前缀表，观察最后一个元素的值与字符串长度的关系，理解为什么可以判断是否存在重复子串。",
+      "complexity": "时间 O(n) · 空间 O(n)"
   }
 }
+
