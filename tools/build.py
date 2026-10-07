@@ -96,6 +96,7 @@ def collect(src: Path, out: Path, meta: dict) -> list[dict]:
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     known = meta.get("problems", {})
+    # 题目源文件统一放在仓库根目录，public/problems 由构建过程生成。
     files = sorted(p for p in src.glob("*.html") if p.is_file() and p.name != "index.html")
     if not files:
         sys.exit(f"[x] 源目录里没有找到任何 .html 题目文件：{src}")

@@ -1,10 +1,10 @@
 /* 本文件由 tools/build.py 自动生成，重新运行脚本会覆盖。
    小改文案可以直接手改，但下次 build 会被 meta.json 里的值覆盖。 */
 window.__PROBLEMS__ = {
-  "generatedAt": "2026-10-06 20:48:44",
+  "generatedAt": "2026-10-07 17:36:33",
   "site": {
-    "title": "算法可视化题库",
-    "subtitle": "字符串专题 · 逐帧看懂双指针与 KMP",
+    "title": "代码随想录刷题同步算法原理可视化site",
+    "subtitle": "",
     "description": "本地 LeetCode / 卡玛网 算法题的可视化演示合集，支持逐帧单步、变量追踪与代码行高亮联动。"
   },
   "problems": [
@@ -15,7 +15,7 @@ window.__PROBLEMS__ = {
       "platform": "LeetCode",
       "title": "反转字符串",
       "subtitle": "变量可视化",
-      "category": "字符串 · 双指针",
+      "category": "字符串",
       "tags": [
         "双指针",
         "原地交换"
@@ -38,7 +38,7 @@ window.__PROBLEMS__ = {
       "platform": "LeetCode",
       "title": "反转字符串 Ⅱ",
       "subtitle": "变量变化动画",
-      "category": "字符串 · 双指针",
+      "category": "字符串",
       "tags": [
         "双指针",
         "分段处理"
@@ -61,7 +61,7 @@ window.__PROBLEMS__ = {
       "platform": "卡玛网",
       "title": "右旋字符串",
       "subtitle": "变量变化动画",
-      "category": "字符串 · 三次反转",
+      "category": "字符串",
       "tags": [
         "三次反转",
         "异或交换"
@@ -84,7 +84,7 @@ window.__PROBLEMS__ = {
       "platform": "LeetCode",
       "title": "找出字符串中第一个匹配项的下标",
       "subtitle": "KMP 演示",
-      "category": "字符串 · KMP",
+      "category": "字符串",
       "tags": [
         "KMP",
         "next 前缀表"
@@ -99,6 +99,29 @@ window.__PROBLEMS__ = {
       "fingerprint": "1bc2d7b432",
       "updated": "2026-10-06 19:50",
       "source": "leetcode.28.找出字符串中第一个匹配项的下标_静态网页.html"
+    },
+    {
+      "id": "leetcode-459-repeated-substring",
+      "order": 5,
+      "no": "459",
+      "platform": "LeetCode",
+      "title": "重复的子字符串",
+      "subtitle": "KMP next 表演示",
+      "category": "字符串",
+      "tags": [
+        "KMP",
+        "next 前缀表"
+      ],
+      "level": "简单",
+      "language": "Java",
+      "theme": "light",
+      "summary": "构造 next 前缀表，观察最后一个元素的值与字符串长度的关系，理解为什么可以判断是否存在重复子串。",
+      "complexity": "时间 O(n) · 空间 O(n)",
+      "file": "problems/leetcode-459-repeated-substring.html",
+      "bytes": 12075,
+      "fingerprint": "600e5c9751",
+      "updated": "2026-10-07 16:16",
+      "source": "leetcode.459.重复的子字符串_算法逻辑原理动画展示静态网页.html"
     }
   ]
 };

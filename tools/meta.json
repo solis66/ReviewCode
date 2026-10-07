@@ -6,8 +6,8 @@
   ],
 
   "site": {
-    "title": "算法可视化题库",
-    "subtitle": "字符串专题 · 逐帧看懂双指针与 KMP",
+    "title": "代码随想录刷题同步算法原理可视化site",
+    "subtitle": "",
     "description": "本地 LeetCode / 卡玛网 算法题的可视化演示合集，支持逐帧单步、变量追踪与代码行高亮联动。"
   },
 
@@ -19,7 +19,7 @@
       "platform": "LeetCode",
       "title": "反转字符串",
       "subtitle": "变量可视化",
-      "category": "字符串 · 双指针",
+      "category": "字符串",
       "tags": ["双指针", "原地交换"],
       "level": "简单",
       "language": "Python",
@@ -35,7 +35,7 @@
       "platform": "LeetCode",
       "title": "反转字符串 Ⅱ",
       "subtitle": "变量变化动画",
-      "category": "字符串 · 双指针",
+      "category": "字符串",
       "tags": ["双指针", "分段处理"],
       "level": "简单",
       "language": "Java",
@@ -51,7 +51,7 @@
       "platform": "卡玛网",
       "title": "右旋字符串",
       "subtitle": "变量变化动画",
-      "category": "字符串 · 三次反转",
+      "category": "字符串",
       "tags": ["三次反转", "异或交换"],
       "level": "简单",
       "language": "Java",
@@ -67,7 +67,7 @@
       "platform": "LeetCode",
       "title": "找出字符串中第一个匹配项的下标",
       "subtitle": "KMP 演示",
-      "category": "字符串 · KMP",
+      "category": "字符串",
       "tags": ["KMP", "next 前缀表"],
       "level": "简单",
       "language": "Java",
@@ -82,7 +82,7 @@
       "platform": "LeetCode",
       "title": "重复的子字符串",
       "subtitle": "KMP next 表演示",
-      "category": "字符串 · KMP",
+      "category": "字符串",
       "tags": ["KMP", "next 前缀表"],
       "level": "简单",
       "language": "Java",
@@ -91,4 +91,4 @@
       "complexity": "时间 O(n) · 空间 O(n)"
   }
 }
-
+}
