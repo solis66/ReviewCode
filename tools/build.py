@@ -48,6 +48,38 @@ def slugify(text: str) -> str:
     return text.strip("-").lower()
 
 
+def normalize_categories(item: dict) -> list[str]:
+    """把 category（单值·旧）与 categories（数组·新）统一成 categories 列表。
+
+    兼容三种写法：
+      * 只写 categories（推荐）：直接用；
+      * 只写 category（历史数据）：包装成单元素列表；
+      * 两者都写：以 categories 为准。
+
+    统一后会把 categories[0] 回填到 category，这样只认旧字段的消费者
+    （例如尚未升级的页面）不会因为新增字段而读不到分类。
+    """
+    raw = item.get("categories")
+    if not isinstance(raw, list):
+        raw = []
+    if not raw:
+        single = item.get("category")
+        raw = [single] if single else []
+
+    names: list[str] = []
+    for name in raw:
+        name = str(name).strip()
+        # 去重且保持书写顺序：同一题不会在目录里重复出现，顺序也由作者决定
+        if name and name not in names:
+            names.append(name)
+    if not names:
+        names = ["未分类"]
+
+    item["categories"] = names
+    item["category"] = names[0]
+    return names
+
+
 def derive(html_file: Path, index: int) -> dict:
     """meta.json 里没登记时的兜底识别。"""
     stem = html_file.stem
@@ -107,6 +139,7 @@ def collect(src: Path, out: Path, meta: dict) -> list[dict]:
     for i, path in enumerate(files, start=1):
         item = dict(known.get(path.name) or derive(path, i))
         item.setdefault("order", 1000 + i)
+        normalize_categories(item)
 
         if path.name not in known:
             print(f"[~] {path.name} 未在 meta.json 登记，已按文件名自动识别。")

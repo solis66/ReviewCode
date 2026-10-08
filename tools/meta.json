@@ -2,7 +2,9 @@
   "_说明": [
     "题目元数据表。key = 源目录里的原始文件名（含 .html 后缀），必须与磁盘上完全一致。",
     "新增题目时：把 HTML 放进源目录，然后在下面补一条，再运行 build.py 即可。",
-    "order 决定门户页里的排序；不写则默认排在已编号题目后面。"
+    "order 决定门户页里的排序；不写则默认排在已编号题目后面。",
+    "分类：categories 是数组，写几个就会在门户目录里的几个专题下同时出现（例如同时属于「数组」和「双指针法」）。",
+    "category 是旧版的单值写法，仍然兼容；两者都写时以 categories 为准，构建时会把 categories[0] 回填到 category。"
   ],
 
   "site": {
@@ -89,6 +91,22 @@
       "theme": "light",
       "summary": "构造 next 前缀表，观察最后一个元素的值与字符串长度的关系，理解为什么可以判断是否存在重复子串。",
       "complexity": "时间 O(n) · 空间 O(n)"
+    },
+
+    "leetcode_27_移除元素.html": {
+      "id": "leetcode-27-remove-element",
+      "order": 6,
+      "no": "27",
+      "platform": "LeetCode",
+      "title": "移除元素",
+      "subtitle": "快慢指针原地覆盖",
+      "categories": ["数组", "双指针法"],
+      "tags": ["快慢指针", "原地覆盖"],
+      "level": "简单",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "fastIndex 只读不回头，slowIndex 只写不后退。逐步观察需要保留的元素如何原地搬到数组前段，以及被跳过的 val 是如何被覆盖掉的。",
+      "complexity": "时间 O(n) · 空间 O(1)"
+    }
   }
-}
 }

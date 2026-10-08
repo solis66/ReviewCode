@@ -379,7 +379,8 @@ button{font:inherit;color:inherit}
   var LIST = DATA ? DATA.problems.slice() : [];
 
   var PLATFORM_ACCENT = { 'LeetCode': 'var(--blue)', '卡玛网': 'var(--orange)', '本地': 'var(--purple)' };
-  // 固定专题顺序，保证空专题也会显示在目录中，后续新增题目只需填写 category。
+  // 固定专题顺序，保证空专题也会显示在目录中；新增题目只需在 meta.json 里填 categories，
+  // 出现这里没登记的新分类时会自动追加到目录末尾，不会丢题。
   var CATEGORY_ORDER = ['数组', '链表', '哈希表', '字符串', '双指针法', '栈与队列', '二叉树', '回溯算法', '贪心算法', '动态规划', '单调栈', '图论'];
   // 目录默认收起，打开题目时会自动展开其所属专题。
   var collapsedGroups = {};
@@ -434,13 +435,23 @@ button{font:inherit;color:inherit}
 
   function accentOf(p) { return PLATFORM_ACCENT[p.platform] || 'var(--blue)'; }
 
+  // 一道题可以同时归属多个专题（例如「数组」+「双指针法」）。
+  // 优先读 categories 数组，退化到旧的单值 category，两种元数据写法都支持。
+  function categoriesOf(p) {
+    var list = (p && Array.isArray(p.categories) && p.categories.length)
+      ? p.categories
+      : (p && p.category ? [p.category] : []);
+    return list.length ? list : ['未分类'];
+  }
+
   function norm(s) { return String(s == null ? '' : s).toLowerCase(); }
 
   function matches(p) {
     if (state.platform !== 'all' && p.platform !== state.platform) return false;
     if (!state.q) return true;
     var q = norm(state.q);
-    var hay = [p.no, p.title, p.subtitle, p.platform, p.category, p.language, p.level, p.complexity, p.summary]
+    var hay = [p.no, p.title, p.subtitle, p.platform, p.language, p.level, p.complexity, p.summary]
+      .concat(categoriesOf(p))
       .concat(p.tags || []).join(' ');
     return norm(hay).indexOf(q) !== -1;
   }
@@ -531,13 +542,22 @@ button{font:inherit;color:inherit}
     }
     var groups = {};
     items.forEach(function (p) {
-      var key = p.category || '字符串';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(p);
+      // 一题多专题：每个分类下都挂一次，同一题可能出现在多个分组里
+      categoriesOf(p).forEach(function (key) {
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(p);
+      });
+    });
+
+    // 已登记专题按固定顺序展示（空专题也保留占位）；元数据里出现的新分类追加到末尾，
+    // 避免因为漏改 CATEGORY_ORDER 导致题目在目录里“凭空消失”。
+    var keys = CATEGORY_ORDER.slice();
+    Object.keys(groups).forEach(function (key) {
+      if (keys.indexOf(key) === -1) keys.push(key);
     });
 
     var html = '';
-    CATEGORY_ORDER.forEach(function (key) {
+    keys.forEach(function (key) {
       var groupItems = groups[key] || [];
       var collapsed = collapsedGroups[key] !== false;
       html += '<div class="group' + (collapsed ? ' is-collapsed' : '') + '"><div class="group-head">' +
@@ -631,11 +651,15 @@ button{font:inherit;color:inherit}
   function openViewer(id, opts) {
     var p = LIST.filter(function (x) { return x.id === id; })[0];
     if (!p) return;
-    var category = p.category || '字符串';
-    if (Object.prototype.hasOwnProperty.call(collapsedGroups, category)) {
-      collapsedGroups[category] = false;
-      renderSideList();
-    }
+    // 打开题目时，把它归属的每个专题都展开（含元数据里新出现、CATEGORY_ORDER 里没有的分类）
+    var expanded = false;
+    categoriesOf(p).forEach(function (category) {
+      if (collapsedGroups[category] !== false) {
+        collapsedGroups[category] = false;
+        expanded = true;
+      }
+    });
+    if (expanded) renderSideList();
     var changed = state.currentId !== id;
     state.currentId = id;
 

@@ -1,7 +1,7 @@
 /* 本文件由 tools/build.py 自动生成，重新运行脚本会覆盖。
    小改文案可以直接手改，但下次 build 会被 meta.json 里的值覆盖。 */
 window.__PROBLEMS__ = {
-  "generatedAt": "2026-10-07 17:36:33",
+  "generatedAt": "2026-10-08 15:38:51",
   "site": {
     "title": "代码随想录刷题同步算法原理可视化site",
     "subtitle": "",
@@ -25,6 +25,9 @@ window.__PROBLEMS__ = {
       "theme": "dark",
       "summary": "观察 left、right 两个指针与字符数组在每一步如何变化，理解 O(1) 空间的原地交换为什么只需走一半。",
       "complexity": "时间 O(n) · 空间 O(1)",
+      "categories": [
+        "字符串"
+      ],
       "file": "problems/344-reverse-string.html",
       "bytes": 10904,
       "fingerprint": "150e50f004",
@@ -48,6 +51,9 @@ window.__PROBLEMS__ = {
       "theme": "light",
       "summary": "每 2k 个字符为一组，只反转每组的前 k 个字符。逐帧观察 i、start、end、temp 的取值与边界计算。",
       "complexity": "时间 O(n) · 空间 O(n)",
+      "categories": [
+        "字符串"
+      ],
       "file": "problems/541-reverse-string-ii.html",
       "bytes": 14716,
       "fingerprint": "21314dd040",
@@ -71,6 +77,9 @@ window.__PROBLEMS__ = {
       "theme": "light",
       "summary": "整体反转 → 反转前 n 个字符 → 反转后半段，三段动画逐次播放，交换方式为异或实现。",
       "complexity": "时间 O(n) · 空间 O(n)",
+      "categories": [
+        "字符串"
+      ],
       "file": "problems/kamacoder-55-right-rotate.html",
       "bytes": 14742,
       "fingerprint": "2a5800d1d7",
@@ -94,6 +103,9 @@ window.__PROBLEMS__ = {
       "theme": "light",
       "summary": "先构造 next 前缀表，再让主串指针 i 只前进不回退，直观看到每一次失配时 j 的回退落点。",
       "complexity": "时间 O(n+m) · 空间 O(m)",
+      "categories": [
+        "字符串"
+      ],
       "file": "problems/leetcode-28-strstr.html",
       "bytes": 15155,
       "fingerprint": "1bc2d7b432",
@@ -117,11 +129,41 @@ window.__PROBLEMS__ = {
       "theme": "light",
       "summary": "构造 next 前缀表，观察最后一个元素的值与字符串长度的关系，理解为什么可以判断是否存在重复子串。",
       "complexity": "时间 O(n) · 空间 O(n)",
+      "categories": [
+        "字符串"
+      ],
       "file": "problems/leetcode-459-repeated-substring.html",
       "bytes": 12075,
       "fingerprint": "600e5c9751",
       "updated": "2026-10-07 16:16",
       "source": "leetcode.459.重复的子字符串_算法逻辑原理动画展示静态网页.html"
+    },
+    {
+      "id": "leetcode-27-remove-element",
+      "order": 6,
+      "no": "27",
+      "platform": "LeetCode",
+      "title": "移除元素",
+      "subtitle": "快慢指针原地覆盖",
+      "categories": [
+        "数组",
+        "双指针法"
+      ],
+      "tags": [
+        "快慢指针",
+        "原地覆盖"
+      ],
+      "level": "简单",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "fastIndex 只读不回头，slowIndex 只写不后退。逐步观察需要保留的元素如何原地搬到数组前段，以及被跳过的 val 是如何被覆盖掉的。",
+      "complexity": "时间 O(n) · 空间 O(1)",
+      "category": "数组",
+      "file": "problems/leetcode-27-remove-element.html",
+      "bytes": 21779,
+      "fingerprint": "943393e167",
+      "updated": "2026-10-08 15:30",
+      "source": "leetcode_27_移除元素.html"
     }
   ]
 };
