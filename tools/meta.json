@@ -14,19 +14,19 @@
   },
 
   "problems": {
-    "344.反转字符串.html": {
+    "leetcode_344_反转字符串.html": {
       "id": "344-reverse-string",
       "order": 1,
       "no": "344",
       "platform": "LeetCode",
       "title": "反转字符串",
-      "subtitle": "变量可视化",
-      "category": "字符串",
-      "tags": ["双指针", "原地交换"],
+      "subtitle": "双指针 · temp 中转站",
+      "categories": ["字符串", "双指针法"],
+      "tags": ["双指针", "原地交换", "temp 中转站"],
       "level": "简单",
-      "language": "Python",
+      "language": "Java",
       "theme": "dark",
-      "summary": "观察 left、right 两个指针与字符数组在每一步如何变化，理解 O(1) 空间的原地交换为什么只需走一半。",
+      "summary": "i 与 j 相向夹逼，每轮只看三件事：判断 i < j、把 s[i] 存进 temp、再用 temp 回填 s[j]。逐帧观察字符如何原地互换，看懂少了 temp 为什么会丢字符。",
       "complexity": "时间 O(n) · 空间 O(1)"
     },
 

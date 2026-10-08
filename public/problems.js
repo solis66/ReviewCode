@@ -1,7 +1,7 @@
 /* 本文件由 tools/build.py 自动生成，重新运行脚本会覆盖。
    小改文案可以直接手改，但下次 build 会被 meta.json 里的值覆盖。 */
 window.__PROBLEMS__ = {
-  "generatedAt": "2026-10-08 15:38:51",
+  "generatedAt": "2026-10-08 16:10:29",
   "site": {
     "title": "代码随想录刷题同步算法原理可视化site",
     "subtitle": "",
@@ -14,25 +14,27 @@ window.__PROBLEMS__ = {
       "no": "344",
       "platform": "LeetCode",
       "title": "反转字符串",
-      "subtitle": "变量可视化",
-      "category": "字符串",
+      "subtitle": "双指针 · temp 中转站",
+      "categories": [
+        "字符串",
+        "双指针法"
+      ],
       "tags": [
         "双指针",
-        "原地交换"
+        "原地交换",
+        "temp 中转站"
       ],
       "level": "简单",
-      "language": "Python",
+      "language": "Java",
       "theme": "dark",
-      "summary": "观察 left、right 两个指针与字符数组在每一步如何变化，理解 O(1) 空间的原地交换为什么只需走一半。",
+      "summary": "i 与 j 相向夹逼，每轮只看三件事：判断 i < j、把 s[i] 存进 temp、再用 temp 回填 s[j]。逐帧观察字符如何原地互换，看懂少了 temp 为什么会丢字符。",
       "complexity": "时间 O(n) · 空间 O(1)",
-      "categories": [
-        "字符串"
-      ],
+      "category": "字符串",
       "file": "problems/344-reverse-string.html",
-      "bytes": 10904,
-      "fingerprint": "150e50f004",
-      "updated": "2026-09-25 14:35",
-      "source": "344.反转字符串.html"
+      "bytes": 26098,
+      "fingerprint": "437f09ad17",
+      "updated": "2026-10-08 16:10",
+      "source": "leetcode_344_反转字符串.html"
     },
     {
       "id": "541-reverse-string-ii",

@@ -1,87 +1,471 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>344.反转字符串 · 变量可视化</title>
-  <style>
-    :root { --bg:#07111f; --panel:#0e1b2e; --panel2:#13233a; --line:#27425f; --text:#e9f2ff; --muted:#9fb3ca; --blue:#55b7ff; --orange:#ffb45b; --green:#6fe3a2; --pink:#ff7eac; --shadow:0 16px 42px rgba(0,0,0,.28); }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 12% 0%,#15304d 0,#07111f 45%,#050b14 100%); font:15px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
-    .wrap { max-width:1180px; margin:0 auto; padding:30px 22px 42px; }
-    h1 { margin:0; font-size:clamp(25px,4vw,40px); letter-spacing:.02em; }
-    .sub { margin:8px 0 26px; color:var(--muted); }
-    .toolbar { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:end; padding:16px; background:rgba(14,27,46,.88); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); }
-    label { color:var(--muted); font-size:13px; display:flex; flex-direction:column; gap:6px; }
-    input { width:min(390px,72vw); padding:10px 12px; border-radius:10px; border:1px solid #3a5a79; background:#091525; color:var(--text); font:inherit; outline:none; }
-    input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(85,183,255,.18); }
-    button { border:1px solid #3a5a79; background:#162a43; color:var(--text); border-radius:10px; padding:10px 14px; font:inherit; cursor:pointer; transition:.16s ease; }
-    button:hover { transform:translateY(-1px); border-color:var(--blue); background:#1b3858; }
-    button.primary { background:linear-gradient(135deg,#218ed0,#3564d5); border-color:#66c4ff; }
-    button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
-    .layout { margin-top:18px; display:grid; grid-template-columns:1.08fr .92fr; gap:18px; }
-    .panel { background:rgba(14,27,46,.9); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:18px; }
-    .panel h2 { margin:0 0 14px; font-size:17px; }
-    .code { margin:0; padding:15px; border-radius:12px; overflow:auto; background:#07111d; border:1px solid #1e3854; color:#c9d8eb; font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace; }
-    .line { display:block; padding:0 9px; border-left:3px solid transparent; white-space:pre; }
-    .line.active { background:rgba(85,183,255,.14); border-left-color:var(--blue); color:#fff; }
-    .kw { color:#c792ea; } .fn { color:#82aaff; } .num { color:#f78c6c; } .comment { color:#6e879e; }
-    .array { display:flex; flex-wrap:wrap; gap:8px; min-height:82px; align-items:center; padding:16px; border-radius:14px; background:#091525; border:1px solid #24415e; }
-    .cell { position:relative; width:52px; height:58px; display:flex; align-items:center; justify-content:center; border:1px solid #3f6285; border-radius:10px; background:#132943; font-size:22px; font-weight:600; transition:.25s ease; }
-    .cell.swap { background:rgba(255,180,91,.2); border-color:var(--orange); color:#ffd59e; transform:translateY(-4px); }
-    .index { position:absolute; left:0; right:0; bottom:-21px; text-align:center; color:var(--muted); font-size:12px; font-weight:400; }
-    .pointer { position:absolute; top:-25px; font-size:12px; font-weight:700; }
-    .pointer.left { color:var(--blue); } .pointer.right { color:var(--pink); }
-    .vars { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:18px; }
-    .var { padding:13px; border-radius:12px; background:var(--panel2); border:1px solid #2a4867; }
-    .var .name { color:var(--muted); font:12px ui-monospace,monospace; } .var .value { margin-top:4px; font:600 25px ui-monospace,monospace; }
-    .leftv { color:var(--blue); } .rightv { color:var(--pink); } .stepv { color:var(--green); } .statusv { color:var(--orange); font-size:17px!important; }
-    .progress { height:7px; margin:18px 0 7px; border-radius:99px; background:#20354e; overflow:hidden; }
-    .bar { height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--green)); transition:.25s; }
-    .legend { display:flex; gap:16px; flex-wrap:wrap; color:var(--muted); font-size:12px; margin-top:11px; }
-    .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; } .db{background:var(--blue)} .dp{background:var(--pink)} .do{background:var(--orange)}
-    .history { margin-top:16px; max-height:198px; overflow:auto; display:flex; flex-direction:column; gap:7px; }
-    .event { padding:9px 11px; border-left:3px solid var(--green); background:#0b1a2b; border-radius:7px; color:#c8d9eb; font-size:13px; }
-    .empty { color:var(--muted); font-size:13px; }
-    @media (max-width:820px) { .layout { grid-template-columns:1fr; } }
-    @media (max-width:520px) { .wrap{padding:22px 14px 34px}.toolbar{align-items:stretch} input{width:100%} .toolbar label{width:100%} button{flex:1}.cell{width:45px;height:52px} }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>344.反转字符串 · 双指针变量可视化（Java）</title>
+<style>
+  :root{
+    --bg:#07111f; --panel:#0e1b2e; --panel2:#13233a; --line:#27425f; --text:#e9f2ff; --muted:#9fb3ca;
+    --blue:#55b7ff; --orange:#ffb45b; --green:#6fe3a2; --pink:#ff7eac; --red:#ff7b7b;
+    --shadow:0 16px 42px rgba(0,0,0,.28);
+    --cw:58px; --gap:9px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;color:var(--text);
+    background:radial-gradient(circle at 12% 0%,#15304d 0,#07111f 45%,#050b14 100%);
+    font:15px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1240px;margin:0 auto;padding:30px 22px 46px;}
+  h1{margin:0;font-size:clamp(25px,4vw,40px);letter-spacing:.02em;}
+  .sub{margin:8px 0 20px;color:var(--muted);}
+  code{background:#0b1a2b;border:1px solid #23405e;border-radius:5px;padding:1px 6px;font:13px ui-monospace,monospace;color:#bcd6f2;}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end;padding:16px;background:rgba(14,27,46,.88);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);}
+  label{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:6px;}
+  input,select{width:min(320px,72vw);padding:10px 12px;border-radius:10px;border:1px solid #3a5a79;background:#091525;color:var(--text);font:inherit;outline:none;}
+  select{width:auto;}
+  input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(85,183,255,.18);}
+  button{border:1px solid #3a5a79;background:#162a43;color:var(--text);border-radius:10px;padding:10px 14px;font:inherit;cursor:pointer;transition:.16s ease;}
+  button:hover:not(:disabled){transform:translateY(-1px);border-color:var(--blue);background:#1b3858;}
+  button.primary{background:linear-gradient(135deg,#218ed0,#3564d5);border-color:#66c4ff;}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+  .layout{margin-top:18px;display:grid;grid-template-columns:1.02fr .98fr;gap:18px;}
+  .layout > *{min-width:0;}   /* 防止内部宽数组/长代码行把栅格列撑破 */
+  .panel{background:rgba(14,27,46,.9);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0;}
+  .panel h2{margin:0 0 14px;font-size:17px;display:flex;align-items:center;gap:8px;}
+  .tag{font:11px ui-monospace,monospace;color:var(--muted);border:1px solid #2a4867;border-radius:99px;padding:2px 9px;}
+
+  /* 代码区 */
+  .code{margin:0;padding:14px 0;border-radius:12px;overflow:auto;background:#07111d;border:1px solid #1e3854;
+    color:#c9d8eb;font:13px/1.72 ui-monospace,SFMono-Regular,Consolas,monospace;}
+  .line{display:block;padding:0 14px 0 0;border-left:3px solid transparent;white-space:pre;}
+  .line .ln{display:inline-block;width:34px;text-align:right;margin-right:12px;color:#4d6a8a;user-select:none;}
+  .line.active{background:rgba(85,183,255,.14);border-left-color:var(--blue);color:#fff;}
+  .kw{color:#c792ea;} .fn{color:#82aaff;} .num{color:#f78c6c;} .comment{color:#6e879e;}
+
+  /* 数组区 */
+  .stage{padding:18px 16px 8px;border-radius:14px;background:#091525;border:1px solid #24415e;overflow-x:auto;}
+  .cellrow,.ptrrow{display:flex;gap:var(--gap);min-width:max-content;}
+  .col{width:var(--cw);flex:0 0 var(--cw);display:flex;flex-direction:column;align-items:center;}
+  .cellrow .col{gap:6px;}
+  .idx{color:var(--muted);font:12px ui-monospace,monospace;}
+  .box{width:var(--cw);height:58px;display:flex;align-items:center;justify-content:center;border-radius:11px;
+    border:1px solid #3f6285;background:#132943;font:600 22px ui-monospace,monospace;color:#dbeaff;
+    transition:background .22s,border-color .22s,color .22s,box-shadow .22s;}
+  .box.placed{background:rgba(111,227,162,.15);border-color:var(--green);color:#b6f5d3;}
+  .box.pending{background:#0f2137;border-color:#2d4a68;color:#7f9ab7;}
+  .box.cur-i{box-shadow:0 0 0 3px var(--blue);border-color:var(--blue);}
+  .box.cur-j{box-shadow:0 0 0 3px var(--pink);border-color:var(--pink);}
+  .box.cur-write{outline:3px solid var(--orange);outline-offset:3px;animation:pulse .7s ease;}
+  @keyframes pulse{0%{transform:translateY(-6px) scale(1.08);}60%{transform:translateY(-2px) scale(1.02);}100%{transform:none;}}
+
+  .ptrrow{margin-top:2px;min-height:66px;}
+  .badges{display:flex;flex-direction:column;gap:4px;align-items:center;}
+  .pill{font:700 11px ui-monospace,monospace;border-radius:99px;padding:2px 8px;white-space:nowrap;border:1px solid transparent;}
+  .pill.i{background:rgba(85,183,255,.18);border-color:var(--blue);color:#a9dcff;}
+  .pill.j{background:rgba(255,126,172,.18);border-color:var(--pink);color:#ffb3cd;}
+  .arrow{font-size:12px;line-height:1;}
+  .arrow.ai{color:var(--blue);} .arrow.aj{color:var(--pink);}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px;}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+  .dgreen{background:var(--green);} .dgray{background:#4a678a;} .dblue{background:var(--blue);}
+  .dpink{background:var(--pink);} .dorange{background:var(--orange);}
+
+  /* temp 中转站 */
+  .tempwrap{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border-radius:12px;
+    background:#0b1a2b;border:1px solid #23405e;flex-wrap:wrap;transition:border-color .22s;}
+  .tempwrap.active{border-color:var(--orange);}
+  .tempwrap .tname{font:13px ui-monospace,monospace;color:var(--muted);}
+  .tbox{width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:11px;
+    border:1px dashed #3a5a79;background:#0f2137;color:#7f9ab7;font:600 22px ui-monospace,monospace;transition:.22s;flex:0 0 auto;}
+  .tempwrap.active .tbox{border-style:solid;border-color:var(--orange);background:rgba(255,180,91,.18);
+    color:#ffd9a6;box-shadow:0 0 0 3px rgba(255,180,91,.16);}
+  .tempwrap .tnote{font-size:13px;color:#cfe2f5;}
+
+  /* 变量面板 */
+  .vars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+  .var{padding:12px;border-radius:12px;background:var(--panel2);border:1px solid #2a4867;min-width:0;}
+  .var .name{color:var(--muted);font:12px ui-monospace,monospace;}
+  .var .value{margin-top:4px;font:600 22px ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .v-i{color:var(--blue);} .v-j{color:var(--pink);} .v-cmp{color:var(--green);font-size:18px!important;}
+  .v-op{color:#ffd9a6;font-size:15px!important;} .v-cellv{color:#cfe2f5;font-size:18px!important;}
+  .delta{font:11px ui-monospace,monospace;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .desc{margin-top:16px;padding:14px;border-radius:12px;background:#0b1a2b;border:1px solid #23405e;
+    border-left:4px solid var(--blue);font-size:14px;line-height:1.7;color:#cfe2f5;min-height:76px;}
+  .desc b{color:#fff;}
+
+  .progress{height:7px;margin:16px 0 7px;border-radius:99px;background:#20354e;overflow:hidden;}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--green));transition:.25s;}
+
+  .tablewrap{margin-top:12px;overflow:auto;max-height:300px;border-radius:12px;border:1px solid #23405e;}
+  table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #1d3350;white-space:nowrap;}
+  th{position:sticky;top:0;background:#0c1b2d;color:var(--muted);font-weight:600;font-size:12px;z-index:1;}
+  tbody tr.cur{background:rgba(85,183,255,.14);}
+  tbody tr.cur td{color:#fff;}
+  td.mono{font-family:ui-monospace,monospace;}
+  td.ok{color:var(--green);}
+
+  .insight{margin:0;padding-left:18px;color:#cfe2f5;font-size:14px;line-height:1.85;}
+  .insight li::marker{color:var(--blue);}
+  .insight b{color:#fff;background:rgba(85,183,255,.14);border-radius:4px;padding:0 4px;}
+  .result{margin-top:14px;padding:14px;border-radius:12px;background:rgba(111,227,162,.1);border:1px solid var(--green);font-size:14px;color:#b6f5d3;line-height:1.7;}
+  .result b{color:#fff;}
+
+  @media (max-width:980px){ .layout{grid-template-columns:1fr;} }
+  @media (max-width:560px){
+    .wrap{padding:22px 14px 36px;} .toolbar{align-items:stretch;} input,.toolbar label{width:100%;}
+    button{flex:1;} .vars{grid-template-columns:1fr 1fr;} :root{--cw:48px;} .box{height:50px;font-size:19px;}
+  }
+</style>
 </head>
 <body>
-  <main class="wrap">
-    <h1>344. 反转字符串</h1>
-    <p class="sub">观察 <code>left</code>、<code>right</code> 与字符数组在每一步如何变化</p>
-    <section class="toolbar" aria-label="控制区">
-      <label>输入字符数组（直接输入字符串）<input id="input" value="hello" maxlength="32" aria-label="输入字符串" /></label>
-      <button id="reset">重置</button><button id="step" class="primary">单步执行</button><button id="play">▶ 自动播放</button>
-    </section>
-    <div class="layout">
-      <section class="panel"><h2>代码执行位置</h2>
-        <pre class="code" aria-label="Python 源码"><span class="line" data-line="1"><span class="kw">class</span> Solution:</span><span class="line" data-line="2">    <span class="kw">def</span> <span class="fn">reverseString</span>(self, s: List[str]):</span><span class="line" data-line="3">        <span class="comment"># 原地修改 s，不返回结果</span></span><span class="line" data-line="4">        left, right = <span class="num">0</span>, <span class="fn">len</span>(s) - <span class="num">1</span></span><span class="line" data-line="5">        <span class="kw">while</span> left &lt; right:</span><span class="line" data-line="6">            s[left], s[right] = s[right], s[left]</span><span class="line" data-line="7">            left += <span class="num">1</span></span><span class="line" data-line="8">            right -= <span class="num">1</span></span></pre>
+<main class="wrap">
+  <h1>344. 反转字符串 · 双指针（Java）</h1>
+  <p class="sub">看清 <code>i</code> 与 <code>j</code> 如何相向夹逼，以及 <code>temp</code> 在交换字符时扮演的 <b>中转站</b> 角色 —— 少了它，字符就会被覆盖丢失。</p>
+
+  <section class="toolbar" aria-label="控制区">
+    <label>字符数组 s（直接输入字符串）<input id="input" value="hello" maxlength="24" aria-label="输入字符串" /></label>
+    <button id="preset1">hello（奇数）</button>
+    <button id="preset2">abcd（偶数）</button>
+    <button id="preset3">a（单字符）</button>
+    <button id="reset">重置</button>
+    <button id="prev">◀ 上一步</button>
+    <button id="step" class="primary">下一步 ▶</button>
+    <button id="play">▶ 自动播放</button>
+    <label>速度<select id="speed"><option value="1400">慢</option><option value="900" selected>中</option><option value="450">快</option></select></label>
+  </section>
+
+  <div class="layout">
+    <div>
+      <section class="panel">
+        <h2>Java 代码 · 执行位置 <span class="tag">双指针</span></h2>
+        <pre class="code" id="code" aria-label="Java 源码"></pre>
       </section>
-      <section class="panel"><h2>变量与数组</h2><div id="array" class="array" aria-live="polite"></div>
-        <div class="vars"><div class="var"><div class="name">left</div><div id="left" class="value leftv">0</div></div><div class="var"><div class="name">right</div><div id="right" class="value rightv">0</div></div><div class="var"><div class="name">step</div><div id="stepNo" class="value stepv">0</div></div><div class="var"><div class="name">状态</div><div id="status" class="value statusv">准备开始</div></div></div>
-        <div class="progress" aria-label="执行进度"><div id="bar" class="bar"></div></div><div id="progressText" class="legend">0 / 0 次交换</div>
-        <div class="legend"><span><i class="dot db"></i>left 指针</span><span><i class="dot dp"></i>right 指针</span><span><i class="dot do"></i>本次交换</span></div>
-        <div id="history" class="history" aria-live="polite"><div class="empty">点击“单步执行”查看变量变化</div></div>
+
+      <section class="panel" style="margin-top:18px">
+        <h2>核心不变量</h2>
+        <ul class="insight">
+          <li><b>[0, i)</b> 与 <b>(j, n-1]</b> 是「已就位区间」：这些字符已经落在最终位置上，永远不会再被改动。</li>
+          <li><b>i</b> 指向待处理区间的最左，<b>j</b> 指向最右；每完成一轮交换，区间 <b>[i, j]</b> 两边各缩一格，所以最多执行 <b>⌊n/2⌋</b> 轮。</li>
+          <li><b>temp 是交换的中转站</b>：Java 里 <code>s[i] = s[j]</code> 会直接把 s[i] 冲掉，所以必须<b>先把 s[i] 存进 temp</b>，再回填到 s[j]——三行代码的顺序不能颠倒。</li>
+          <li>循环条件是 <b>i &lt; j</b> 而不是 <b>i &lt;= j</b>：长度为奇数时最后 <b>i == j</b>，中间那个字符本来就在正确位置，交换反而多余。</li>
+          <li>只用 i、j、temp 三个变量 → 额外空间 <b>O(1)</b>；每个字符最多被读写一次 → 时间 <b>O(n)</b>，而且是原地修改，不新开数组。</li>
+        </ul>
       </section>
     </div>
-  </main>
-  <script>
-    const $ = id => document.getElementById(id);
-    const input = $('input'), arrayEl = $('array'), leftEl = $('left'), rightEl = $('right'), stepEl = $('stepNo'), statusEl = $('status'), barEl = $('bar'), progressText = $('progressText'), historyEl = $('history');
-    let state = { chars:[], left:0, right:-1, step:0, swaps:0, done:false, last:null }, timer = null;
-    function makeState(){ const chars = Array.from(input.value || ''); state = { chars, left:0, right:chars.length-1, step:0, swaps:Math.floor(chars.length/2), done:chars.length<2, last:null }; render(); }
-    function render(){
-      arrayEl.innerHTML=''; state.chars.forEach((ch,i)=>{ const cell=document.createElement('div'); cell.className='cell'+(state.last && (i===state.last[0]||i===state.last[1])?' swap':''); cell.textContent=ch || '␠'; cell.setAttribute('aria-label',`索引 ${i}：${ch||'空格'}`); const idx=document.createElement('span'); idx.className='index'; idx.textContent=i; cell.append(idx); if(i===state.left && !state.done){const p=document.createElement('span');p.className='pointer left';p.textContent='left';cell.append(p);} if(i===state.right && !state.done){const p=document.createElement('span');p.className='pointer right';p.textContent='right';cell.append(p);} arrayEl.append(cell); });
-      leftEl.textContent=state.left; rightEl.textContent=state.right<0?'—':state.right; stepEl.textContent=state.step; statusEl.textContent=state.done?'已完成':(state.last?'刚刚交换':'准备开始'); const ratio=state.swaps?Math.min(100,state.step/state.swaps*100):100; barEl.style.width=ratio+'%'; progressText.textContent=`${Math.min(state.step,state.swaps)} / ${state.swaps} 次交换`; document.querySelectorAll('.line').forEach(x=>x.classList.toggle('active',x.dataset.line=== (state.done?'5':state.last?'6':'4')));
+
+    <div>
+      <section class="panel">
+        <h2>字符数组与双指针 <span class="tag" id="stepTag">第 0 步</span></h2>
+
+        <div class="stage">
+          <div class="cellrow" id="cellRow"></div>
+          <div class="ptrrow" id="ptrRow"></div>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot dgreen"></i>已就位（不再改动）</span>
+          <span><i class="dot dgray"></i>待处理区间 [i, j]</span>
+          <span><i class="dot dblue"></i>i 左指针</span>
+          <span><i class="dot dpink"></i>j 右指针</span>
+          <span><i class="dot dorange"></i>本步写入位置</span>
+        </div>
+
+        <div class="tempwrap" id="tempWrap">
+          <span class="tname">char temp =</span>
+          <div class="tbox" id="tempBox">—</div>
+          <span class="tnote" id="tempNote">尚未使用</span>
+        </div>
+
+        <div class="vars">
+          <div class="var"><div class="name">i（左指针）</div><div id="vI" class="value v-i">0</div><div id="vID" class="delta">&nbsp;</div></div>
+          <div class="var"><div class="name">j（右指针）</div><div id="vJ" class="value v-j">—</div><div id="vJD" class="delta">&nbsp;</div></div>
+          <div class="var"><div class="name">i &lt; j（循环条件）</div><div id="vCmp" class="value v-cmp">—</div><div id="vCmpD" class="delta">&nbsp;</div></div>
+          <div class="var"><div class="name">s[i] 当前值</div><div id="vSi" class="value v-cellv">—</div><div id="vSiD" class="delta">&nbsp;</div></div>
+          <div class="var"><div class="name">s[j] 当前值</div><div id="vSj" class="value v-cellv">—</div><div id="vSjD" class="delta">&nbsp;</div></div>
+          <div class="var"><div class="name">本步操作</div><div id="vOp" class="value v-op">—</div><div id="vOpD" class="delta">&nbsp;</div></div>
+        </div>
+
+        <div class="desc" id="desc">点击「下一步 ▶」开始逐步执行。</div>
+
+        <div class="progress" aria-label="执行进度"><div id="bar" class="bar"></div></div>
+        <div class="legend" style="margin-top:0"><span id="progressText">第 0 / 0 步</span></div>
+      </section>
+
+      <section class="panel" style="margin-top:18px">
+        <h2>过程记录表</h2>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>轮次</th><th>i</th><th>j</th><th>s[i]（交换前）</th><th>s[j]（交换前）</th><th>temp = s[i]</th><th>交换后数组</th><th>指针变化</th></tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="result" id="result">每轮交换三件事：<b>存 temp → s[i] 被覆盖 → temp 回填 s[j]</b>。执行到底后这里会显示完整的反转前后对比。</div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const inputEl = $('input'), codeEl = $('code'), cellRow = $('cellRow'), ptrRow = $('ptrRow');
+
+const CODE = [
+  'class Solution {                        // 双指针',
+  '    public void reverseString(char[] s) {',
+  '        // 第一个指针指向第一个元素',
+  '        int i = 0;',
+  '        // 第二个指针指向最后一个元素',
+  '        int j = s.length - 1;',
+  '        while (i < j) {',
+  '            // 利用 swap 方法交换字符',
+  '            char temp = s[i];',
+  '            s[i] = s[j];',
+  '            s[j] = temp;',
+  '            // 字符交换后将前后指针加减',
+  '            i++;',
+  '            j--;',
+  '        }',
+  '    }',
+  '}'
+];
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* 单次扫描：避免把已插入标签里的 class= 等文字再次匹配，导致代码行渲染错乱 */
+function hl(s){
+  const re = /(\/\/[^\n]*)|\b(class|public|void|int|char|while|return|new)\b|\b(Solution|reverseString|length|temp)\b|\b(\d+)\b/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(s)) !== null){
+    out += esc(s.slice(last, m.index));
+    const t = esc(m[0]);
+    if (m[1] !== undefined)      out += '<span class="comment">' + t + '</span>';
+    else if (m[2] !== undefined) out += '<span class="kw">' + t + '</span>';
+    else if (m[3] !== undefined) out += '<span class="fn">' + t + '</span>';
+    else                         out += '<span class="num">' + t + '</span>';
+    last = m.index + m[0].length;
+    if (m[0].length === 0) re.lastIndex++;   /* 防空匹配死循环 */
+  }
+  return out + esc(s.slice(last));
+}
+codeEl.innerHTML = CODE.map((l,i)=>`<span class="line" data-line="${i+1}"><span class="ln">${i+1}</span>${hl(l)}</span>`).join('');
+
+/* ---------- 预生成每一步的状态快照（渲染只读快照，不重算） ---------- */
+const show = ch => ch === ' ' ? '␣' : ch;
+
+function buildStates(chars){
+  const steps = [], rounds = [];
+  const n = chars.length, a = chars.slice();
+  let i = 0, j = n - 1;
+
+  steps.push({ arr:a.slice(), i, j, temp:null, phase:'init', lines:[4,6], write:null, roundNo:null, op:'初始化',
+    tnote:'尚未使用',
+    desc:`初始化：<b>i = 0</b>（指向第一个元素），<b>j = ${j}</b>（指向最后一个元素）。两个指针一左一右，准备相向夹逼。` });
+
+  while (i < j){
+    const roundNo = rounds.length + 1;
+    const leftCh = a[i], rightCh = a[j];
+
+    // 1. 判断循环条件
+    steps.push({ arr:a.slice(), i, j, temp:null, phase:'check', lines:[7], write:null, roundNo, op:'判断 i < j',
+      tnote:'尚未使用',
+      desc:`判断循环条件 <b>i &lt; j</b>：<b>${i} &lt; ${j}</b> 成立 → 进入循环体，本轮要交换 <b>s[${i}]</b> 与 <b>s[${j}]</b>。` });
+
+    // 2. temp = s[i]
+    steps.push({ arr:a.slice(), i, j, temp:leftCh, phase:'read', lines:[9], write:null, roundNo, op:'temp = s[i]',
+      tnote:`把 s[${i}] 的 '${leftCh}' 暂存进 temp`,
+      desc:`<b>char temp = s[${i}]</b> → 先把左边的字符 <b>'${leftCh}'</b> 存进 temp。这一步是关键：下一步 s[${i}] 就会被冲掉，不先存起来就再也找不回来了。` });
+
+    // 3. s[i] = s[j]
+    a[i] = rightCh;
+    steps.push({ arr:a.slice(), i, j, temp:leftCh, phase:'overwrite', lines:[10], write:i, roundNo, op:'s[i] = s[j]',
+      tnote:`temp 里还留着 '${leftCh}'（别丢）`,
+      desc:`<b>s[${i}] = s[${j}]</b> → 用右边的 <b>'${rightCh}'</b> 覆盖左边。此刻 <b>s[${i}] 和 s[${j}] 都是 '${rightCh}'</b>，原来的 '${leftCh}' 只存在于 temp 里 —— 这就是必须有 temp 的原因。` });
+
+    // 4. s[j] = temp
+    a[j] = leftCh;
+    steps.push({ arr:a.slice(), i, j, temp:leftCh, phase:'restore', lines:[11], write:j, roundNo, op:'s[j] = temp',
+      tnote:`把 temp 的 '${leftCh}' 回填到 s[${j}]`,
+      desc:`<b>s[${j}] = temp</b> → 把暂存的 <b>'${leftCh}'</b> 写回右边，交换完成：<b>s[${i}] = '${rightCh}'，s[${j}] = '${leftCh}'</b>，两个字符已在最终位置上。` });
+
+    // 5. i++ / j--
+    i++; j--;
+    rounds.push({ no: roundNo, i: i-1, j: j+1, leftCh, rightCh, arrAfter: a.slice(), iNext: i, jNext: j });
+    steps.push({ arr:a.slice(), i, j, temp:leftCh, phase:'move', lines:[13,14], write:null, roundNo, op:'i++，j--',
+      tnote:`本轮已完成，temp 里的 '${leftCh}' 已经回填出去了`,
+      desc:`<b>i++ → ${i}</b>，<b>j-- → ${j}</b>，两指针各向内收一格。下标 ${i-1} 和 ${j+1} 的字符已经就位，之后不会再被改动。` });
+  }
+
+  // 循环退出：最后一次条件判断（不成立）
+  let exitDesc;
+  if (!rounds.length){
+    exitDesc = `判断循环条件 <b>i &lt; j</b>：<b>${i} &lt; ${j}</b> 不成立 → 数组长度小于 2，没有任何字符需要交换，循环体一次都不执行。`;
+  } else if (i === j){
+    exitDesc = `再次判断 <b>i &lt; j</b>：<b>${i} &lt; ${j}</b> 不成立（两指针重合）→ 退出循环。下标 ${i} 是正中间的字符，左右指针都指向它自己，<b>不需要交换</b> —— 这正是长度为奇数时的收尾条件。`;
+  } else {
+    exitDesc = `再次判断 <b>i &lt; j</b>：<b>${i} &lt; ${j}</b> 不成立（i 已经越过 j）→ 退出循环，所有字符都已就位。`;
+  }
+  steps.push({ arr:a.slice(), i, j, temp:null, phase:'check', lines:[7], write:null, roundNo:null, op:'判断 i < j',
+    tnote:'循环已结束，temp 不再使用', desc:exitDesc });
+
+  steps.push({ arr:a.slice(), i, j, temp:null, phase:'end', lines:[15,16,17], write:null, roundNo:null, op:'方法结束',
+    tnote:'循环已结束，temp 不再使用',
+    desc:`方法结束，字符串已<b>原地反转</b>。最终 <b>s = [${a.map(show).join(', ')}]</b>，共交换 <b>${rounds.length}</b> 轮，额外空间只用了 i、j、temp 三个变量。` });
+
+  return { steps, rounds };
+}
+
+let steps = [], rounds = [], cur = 0, timer = null, original = [];
+
+/* ---------- 渲染 ---------- */
+function render(){
+  const st = steps[cur], n = st.arr.length;
+
+  cellRow.innerHTML = '';
+  ptrRow.innerHTML = '';
+
+  for (let k = 0; k < n; k++){
+    const col = document.createElement('div'); col.className = 'col';
+    const idx = document.createElement('span'); idx.className = 'idx'; idx.textContent = k;
+    const box = document.createElement('div'); box.className = 'box';
+
+    const placed = (st.phase === 'end') || (k < st.i) || (k > st.j);
+    box.classList.add(placed ? 'placed' : 'pending');
+    if (k === st.i) box.classList.add('cur-i');
+    if (k === st.j) box.classList.add('cur-j');
+    if (st.write !== null && k === st.write) box.classList.add('cur-write');
+    box.textContent = show(st.arr[k]);
+    box.title = `s[${k}] = '${st.arr[k]}'`;
+
+    col.append(idx, box);
+    cellRow.append(col);
+
+    const pcol = document.createElement('div'); pcol.className = 'col';
+    const badges = document.createElement('div'); badges.className = 'badges';
+    if (k === st.i){
+      badges.innerHTML += `<span class="arrow ai">▲</span><span class="pill i">i=${st.i}</span>`;
     }
-    function addHistory(text){ if(historyEl.querySelector('.empty')) historyEl.innerHTML=''; const e=document.createElement('div'); e.className='event'; e.textContent=text; historyEl.prepend(e); }
-    function step(){ if(state.done) return; state.last=null; if(state.left<state.right){ const a=state.left,b=state.right; [state.chars[a],state.chars[b]]=[state.chars[b],state.chars[a]]; state.left++; state.right--; state.step++; state.last=[a,b]; addHistory(`第 ${state.step} 次：交换索引 ${a} 与 ${b}，left → ${state.left}，right → ${state.right}`); if(state.left>=state.right) state.done=true; } else state.done=true; render(); if(state.done && timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';} }
-    $('reset').onclick=()=>{ if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';} makeState(); historyEl.innerHTML='<div class="empty">点击“单步执行”查看变量变化</div>'; };
-    $('step').onclick=step; input.addEventListener('input',()=>{ if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';} makeState(); historyEl.innerHTML='<div class="empty">点击“单步执行”查看变量变化</div>'; });
-    $('play').onclick=()=>{ if(state.done) makeState(); if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 自动播放';}else{ $('play').textContent='⏸ 暂停'; timer=setInterval(step,700); } };
-    makeState();
-  </script>
+    if (k === st.j){
+      badges.innerHTML += `<span class="arrow aj">▲</span><span class="pill j">j=${st.j}</span>`;
+    }
+    pcol.append(badges);
+    ptrRow.append(pcol);
+  }
+
+  // temp 中转站
+  const tempOn = (st.phase === 'read' || st.phase === 'overwrite' || st.phase === 'restore');
+  $('tempWrap').classList.toggle('active', tempOn);
+  $('tempBox').textContent = st.temp === null ? '—' : show(st.temp);
+  $('tempNote').textContent = st.tnote;
+
+  // 变量面板
+  $('vI').textContent = st.i;
+  $('vJ').textContent = st.j;
+  $('vID').textContent = (st.phase === 'move') ? `${st.i - 1} → ${st.i}（+1）` : '本步不变';
+  $('vJD').textContent = (st.phase === 'move') ? `${st.j + 1} → ${st.j}（−1）` : '本步不变';
+
+  $('vCmp').textContent = (st.phase === 'check') ? (st.i < st.j ? 'true（成立）' : 'false（不成立）') : '—';
+  $('vCmpD').textContent = (st.phase === 'check')
+    ? (st.i < st.j ? '继续循环' : '退出循环')
+    : '仅在 while 判断时求值';
+
+  $('vSi').textContent = `'${show(st.arr[st.i])}'`;
+  $('vSj').textContent = `'${show(st.arr[st.j])}'`;
+  $('vSiD').textContent = `s[${st.i}]${(st.write === st.i) ? ' ← 本步正在被写入' : ''}`;
+  $('vSjD').textContent = `s[${st.j}]${(st.write === st.j) ? ' ← 本步正在被写入' : ''}`;
+
+  $('vOp').textContent = st.op;
+  $('vOpD').textContent = st.phase === 'end' ? `共 ${rounds.length} 轮交换` : (st.roundNo ? `第 ${st.roundNo} 轮` : '循环外');
+
+  $('desc').innerHTML = st.desc;
+  $('stepTag').textContent = `第 ${cur} / ${steps.length - 1} 步`;
+  $('progressText').textContent = `第 ${cur} / ${steps.length - 1} 步`;
+  $('bar').style.width = (steps.length > 1 ? cur / (steps.length - 1) * 100 : 0) + '%';
+
+  document.querySelectorAll('.line').forEach(x => x.classList.toggle('active', st.lines.includes(+x.dataset.line)));
+
+  document.querySelectorAll('#tbody tr').forEach((tr, ri) => {
+    tr.classList.toggle('cur', st.roundNo === ri + 1);
+  });
+
+  const last = steps[steps.length - 1];
+  $('result').innerHTML = (st.phase === 'end')
+    ? `✅ 反转完成：<b>[${original.map(show).join(', ')}]</b> → <b>[${last.arr.map(show).join(', ')}]</b><br>共交换 <b>${rounds.length}</b> 轮，方法返回 void，改动直接发生在原数组 s 上。`
+    : `每轮交换三件事：<b>存 temp → s[i] 被覆盖 → temp 回填 s[j]</b>。当前已完成 <b>${rounds.filter(r => r.no <= (st.roundNo || rounds.length + 1) - 1).length}</b> / ${rounds.length} 轮。`;
+
+  $('prev').disabled = cur === 0;
+  $('step').disabled = cur === steps.length - 1;
+}
+
+function buildTable(){
+  const tb = $('tbody'); tb.innerHTML = '';
+  rounds.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.no}</td><td class="mono">${r.i}</td><td class="mono">${r.j}</td>
+      <td class="mono">'${show(r.leftCh)}'</td><td class="mono">'${show(r.rightCh)}'</td>
+      <td class="mono ok">'${show(r.leftCh)}'</td>
+      <td class="mono">[${r.arrAfter.map(show).join(' ')}]</td>
+      <td class="mono">i: ${r.i} → ${r.iNext}；j: ${r.j} → ${r.jNext}</td>`;
+    tb.append(tr);
+  });
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>结束</td><td colspan="5">— 循环条件 i &lt; j 不再成立 —</td>
+    <td class="mono">[${(steps[steps.length-1].arr).map(show).join(' ')}]</td>
+    <td class="mono">return（void，原地修改）</td>`;
+  tb.append(tr);
+  if (!rounds.length){
+    const t2 = document.createElement('tr');
+    t2.innerHTML = `<td colspan="8">数组长度小于 2，循环体一次都没执行，没有交换发生。</td>`;
+    tb.append(t2);
+  }
+}
+
+/* ---------- 载入 ---------- */
+function load(){
+  let arr = Array.from(inputEl.value || '');
+  if (arr.length > 24) arr = arr.slice(0, 24);
+  if (!arr.length){ arr = ['h','e','l','l','o']; }
+  inputEl.value = arr.join('');
+  original = arr.slice();
+  const r = buildStates(arr);
+  steps = r.steps; rounds = r.rounds;
+  cur = 0;
+  buildTable();
+  render();
+}
+
+/* ---------- 控制 ---------- */
+function stop(){ if (timer){ clearInterval(timer); timer = null; $('play').textContent = '▶ 自动播放'; } }
+function next(){ if (cur < steps.length - 1){ cur++; render(); } else stop(); }
+function prev(){ if (cur > 0){ cur--; render(); } }
+
+$('step').onclick = () => { stop(); next(); };
+$('prev').onclick = () => { stop(); prev(); };
+$('reset').onclick = () => { stop(); cur = 0; render(); };
+$('play').onclick = () => {
+  if (timer){ stop(); return; }
+  if (cur === steps.length - 1) cur = 0;
+  $('play').textContent = '⏸ 暂停';
+  timer = setInterval(next, +$('speed').value);
+};
+$('speed').onchange = () => { if (timer){ stop(); $('play').click(); } };
+inputEl.onchange = load;
+$('preset1').onclick = () => { stop(); inputEl.value = 'hello'; load(); };
+$('preset2').onclick = () => { stop(); inputEl.value = 'abcd'; load(); };
+$('preset3').onclick = () => { stop(); inputEl.value = 'a'; load(); };
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowRight'){ e.preventDefault(); stop(); next(); }
+  if (e.key === 'ArrowLeft'){ e.preventDefault(); stop(); prev(); }
+  if (e.code === 'Space'){ e.preventDefault(); $('play').click(); }
+});
+
+load();
+</script>
 </body>
 </html>
