@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>151. 反转字符串中的单词 · 三步走变量可视化（Java）</title>
+<style>
+  :root{
+    --bg:#07111f; --panel:#0e1b2e; --panel2:#13233a; --line:#27425f; --text:#e9f2ff; --muted:#9fb3ca;
+    --blue:#55b7ff; --orange:#ffb45b; --green:#6fe3a2; --pink:#ff7eac; --red:#ff7b7b; --purple:#c792ea;
+    --shadow:0 16px 42px rgba(0,0,0,.28);
+    --cw:44px; --gap:7px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;color:var(--text);
+    background:radial-gradient(circle at 12% 0%,#15304d 0,#07111f 45%,#050b14 100%);
+    font:15px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1400px;margin:0 auto;padding:30px 22px 46px;}
+  h1{margin:0;font-size:clamp(23px,3.6vw,36px);letter-spacing:.02em;}
+  .sub{margin:8px 0 20px;color:var(--muted);max-width:1000px;}
+  code{background:#0b1a2b;border:1px solid #23405e;border-radius:5px;padding:1px 6px;font:13px ui-monospace,monospace;color:#bcd6f2;}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:end;padding:16px;background:rgba(14,27,46,.88);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);}
+  label{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:6px;}
+  input,select{width:min(300px,72vw);padding:10px 12px;border-radius:10px;border:1px solid #3a5a79;background:#091525;color:var(--text);font:inherit;outline:none;}
+  select{width:auto;}
+  input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(85,183,255,.18);}
+  button{border:1px solid #3a5a79;background:#162a43;color:var(--text);border-radius:10px;padding:10px 13px;font:inherit;cursor:pointer;transition:.16s ease;}
+  button:hover:not(:disabled){transform:translateY(-1px);border-color:var(--blue);background:#1b3858;}
+  button.primary{background:linear-gradient(135deg,#218ed0,#3564d5);border-color:#66c4ff;}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+  .cols2{margin-top:18px;display:grid;grid-template-columns:1.02fr .98fr;gap:18px;align-items:start;}
+  .cols2 > *{min-width:0;}
+  .stagegrid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,1fr);gap:16px;align-items:start;}
+  .stagegrid > *{min-width:0;}
+  .stagefoot{margin-top:14px;display:grid;grid-template-columns:minmax(280px,.95fr) minmax(320px,1.05fr);gap:16px;align-items:start;}
+  .stagefoot > *{min-width:0;}
+  .stagefoot .vars{margin-top:0;}
+  .panel{background:rgba(14,27,46,.9);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0;}
+  .panel h2{margin:0 0 14px;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tag{font:11px ui-monospace,monospace;color:var(--muted);border:1px solid #2a4867;border-radius:99px;padding:2px 9px;}
+
+  .code{margin:0;padding:14px 0;border-radius:12px;overflow:auto;background:#07111d;border:1px solid #1e3854;
+    color:#c9d8eb;font:12.5px/1.72 ui-monospace,SFMono-Regular,Consolas,monospace;max-height:560px;}
+  .line{display:block;padding:0 14px 0 0;border-left:3px solid transparent;white-space:pre;}
+  .line .ln{display:inline-block;width:30px;text-align:right;margin-right:12px;color:#4d6a8a;user-select:none;}
+  .line.active{background:rgba(85,183,255,.14);border-left-color:var(--blue);color:#fff;}
+  .kw{color:var(--purple);} .fn{color:#82aaff;} .num{color:#f78c6c;} .comment{color:#6e879e;}
+
+  /* ---------- 阶段指示 ---------- */
+  .phaserow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .phz{font-size:12.5px;padding:5px 12px;border-radius:99px;border:1px solid #2a4867;background:#0b1a2b;color:var(--muted);transition:.18s;}
+  .phz.on{background:linear-gradient(135deg,#1d6fb0,#3564d5);border-color:#66c4ff;color:#fff;box-shadow:0 6px 16px rgba(53,100,213,.35);}
+  .phz.done{color:#b6f5d3;border-color:#2f6d52;}
+
+  /* ---------- 字符舞台 ---------- */
+  .stage{padding:14px 14px 6px;border-radius:14px;background:#091525;border:1px solid #24415e;overflow-x:auto;}
+  .rowhead{margin:6px 0 8px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  .rowhead + .cellrow{margin-top:0;}
+  .rowhead .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .cellrow,.ptrrow{display:flex;gap:var(--gap);min-width:max-content;}
+  .empty{align-self:center;color:#5f7b9b;font-size:12.5px;white-space:nowrap;padding:6px 2px;}
+  .col{width:var(--cw);flex:0 0 var(--cw);display:flex;flex-direction:column;align-items:center;}
+  .cellrow .col{gap:5px;}
+  .idx{color:var(--muted);font:11px ui-monospace,monospace;height:15px;}
+  .box{width:var(--cw);height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;
+    border:1px solid #3f6285;background:#132943;font:600 19px ui-monospace,monospace;color:#dbeaff;
+    transition:background .22s,border-color .22s,color .22s,box-shadow .22s;}
+  .box.space{color:#5f7b9b;font-size:17px;}
+  .box.pending{background:#0c1c2e;border-color:#28415c;color:#4f6d8c;}
+  .box.word{background:rgba(111,227,162,.14);border-color:var(--green);color:#b6f5d3;}
+  .box.cur-i{box-shadow:0 0 0 3px var(--blue);border-color:var(--blue);}
+  .box.cur-write{outline:3px solid var(--orange);outline-offset:2px;background:rgba(255,180,91,.18);border-color:var(--orange);color:#ffd9a6;animation:pulse .7s ease;}
+  .box.ghost{border-style:dashed;background:#0a1626;color:#3f5f80;}
+  @keyframes pulse{0%{transform:translateY(-6px) scale(1.08);}60%{transform:translateY(-2px) scale(1.02);}100%{transform:none;}}
+
+  .ptrrow{min-height:52px;align-items:start;}
+  .badges{display:flex;flex-direction:column;gap:3px;align-items:center;}
+  .pill{font:700 10.5px ui-monospace,monospace;border-radius:99px;padding:1px 7px;white-space:nowrap;border:1px solid transparent;}
+  .pill.i{background:rgba(85,183,255,.18);border-color:var(--blue);color:#a9dcff;}
+  .pill.j{background:rgba(255,126,172,.18);border-color:var(--pink);color:#ffb3cd;}
+  .arrow{font-size:11px;line-height:1;}
+  .arrow.ai{color:var(--blue);} .arrow.aj{color:var(--pink);}
+  .rowsep{border-top:1px dashed #23405e;margin:10px 0 4px;}
+
+  .legend{display:flex;gap:13px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:10px;}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+  .dgreen{background:var(--green);} .dgray{background:#4a678a;} .dblue{background:var(--blue);}
+  .dpink{background:var(--pink);} .dorange{background:var(--orange);}
+
+  .vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:9px;margin-top:14px;}
+  .var{padding:10px 12px;border-radius:11px;background:var(--panel2);border:1px solid #2a4867;min-width:0;}
+  .var .name{color:var(--muted);font:11.5px ui-monospace,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .var .value{margin-top:3px;font:600 19px ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .v-i{color:var(--blue);} .v-j{color:var(--pink);} .v-bool{color:var(--green);font-size:15px!important;}
+  .v-str{color:#ffd9a6;font-size:15px!important;} .v-ch{color:#b6f5d3;font-size:17px!important;}
+
+  .desc{margin-top:14px;padding:14px;border-radius:12px;background:#0b1a2b;border:1px solid #23405e;
+    border-left:4px solid var(--blue);font-size:14px;line-height:1.75;color:#cfe2f5;min-height:86px;}
+  .desc b{color:#fff;}
+  .desc .warn{color:var(--orange);}
+
+  .progress{height:7px;margin:16px 0 7px;border-radius:99px;background:#20354e;overflow:hidden;}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--green));transition:.25s;}
+
+  .tablewrap{margin-top:12px;overflow:auto;max-height:320px;border-radius:12px;border:1px solid #23405e;}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums;}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid #1d3350;white-space:nowrap;}
+  th{position:sticky;top:0;background:#0c1b2d;color:var(--muted);font-weight:600;font-size:12px;z-index:1;}
+  tbody tr.cur{background:rgba(85,183,255,.14);}
+  tbody tr.cur td{color:#fff;}
+  td.mono{font-family:ui-monospace,monospace;}
+  td.ok{color:var(--green);}
+  td.ph{color:var(--muted);}
+
+  .insight{margin:0;padding-left:18px;color:#cfe2f5;font-size:13.5px;line-height:1.85;}
+  .insight li{margin-bottom:7px;}
+  .insight li::marker{color:var(--blue);}
+  .insight b{color:#fff;background:rgba(85,183,255,.14);border-radius:4px;padding:0 4px;}
+  .insight code{font-size:12.5px;}
+
+  .result{margin-top:14px;padding:14px;border-radius:12px;background:rgba(111,227,162,.08);border:1px solid var(--green);font-size:13.5px;color:#b6f5d3;line-height:2;}
+  .result b{color:#fff;}
+  .chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:ui-monospace,monospace;}
+  .cbox{padding:6px 11px;border-radius:9px;background:#0b1a2b;border:1px solid #2f6d52;color:#d9ffe9;}
+  .cbox small{display:block;font-size:10.5px;color:var(--muted);font-weight:400;font-family:inherit;}
+
+  @media (max-width:1080px){ .cols2{grid-template-columns:1fr;} .stagefoot{grid-template-columns:1fr;} }
+  @media (max-width:560px){
+    .wrap{padding:22px 14px 36px;} .toolbar{align-items:stretch;} input,.toolbar label{width:100%;}
+    button{flex:1;} :root{--cw:34px;--gap:5px;} .box{height:38px;font-size:16px;} .idx{font-size:10px;}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>151. 反转字符串中的单词 · 三步走（Java）</h1>
+  <p class="sub">
+    不用 <code>split</code> / <code>reverse</code> / <code>trim</code> 这些内置方法，只靠一个 <code>StringBuilder</code> 和几个下标指针：
+    <b>① 去掉首尾与中间多余空格 → ② 把整个字符串反转 → ③ 再把每个单词内部反转回来</b>。
+    下面把每一行代码执行时 <code>start</code>、<code>end</code>、<code>c</code>、<code>sb</code> 的真实取值一步一张快照地摆出来。
+  </p>
+
+  <section class="toolbar" aria-label="控制区">
+    <label>输入字符串 s（可以带多余空格）<input id="input" maxlength="44" aria-label="输入字符串" /></label>
+    <button id="preset1">"␣␣hello␣␣␣world␣␣"</button>
+    <button id="preset2">"the␣sky␣is␣blue"</button>
+    <button id="preset3">"a␣good␣␣␣example"</button>
+    <button id="reset">重置</button>
+    <button id="prev">◀ 上一步</button>
+    <button id="step" class="primary">下一步 ▶</button>
+    <button id="play">▶ 自动播放</button>
+    <label>速度<select id="speed"><option value="1500">慢</option><option value="850" selected>中</option><option value="380">快</option></select></label>
+  </section>
+
+  <!-- ================= 整行：变量舞台（字符行最占宽度，单独占一行才不会被截断） ================= -->
+  <section class="panel" style="margin-top:18px">
+    <h2>变量的变化过程 <span class="tag" id="phaseTag">准备</span> <span class="tag" id="stepTag">第 0 步</span></h2>
+
+    <div class="phaserow" id="phaseRow"></div>
+
+    <div class="stage">
+      <div class="rowhead" id="headS"><i class="dot dgray"></i>输入字符串 s（原始，含多余空格；[start, end] 是还在处理的窗口，灰掉的部分已经处理完或不在窗口内）</div>
+      <div class="cellrow" id="cellRowS"></div>
+      <div class="ptrrow" id="ptrRowS"></div>
+      <div class="rowsep" id="sep"></div>
+      <div class="rowhead" id="headB"><i class="dot dgreen"></i>StringBuilder sb（当前结果；可变，但 setCharAt 只能改字符、不能改长度，最右边虚线格是"末尾之后"，下标等于 n）</div>
+      <div class="cellrow" id="cellRowB"></div>
+      <div class="ptrrow" id="ptrRowB"></div>
+    </div>
+
+    <div class="legend">
+      <span><i class="dot dgray"></i>已处理 / 窗口之外</span>
+      <span><i class="dot dgreen"></i>当前单词区间</span>
+      <span><i class="dot dblue"></i>start（左指针）</span>
+      <span><i class="dot dpink"></i>end（右指针）</span>
+      <span><i class="dot dorange"></i>本步刚被写入或交换的位置</span>
+    </div>
+
+    <div class="stagefoot">
+      <div class="vars" id="vars"></div>
+      <div>
+        <div class="desc" id="desc">点击「下一步 ▶」开始逐步执行（也可以按 → 键）。</div>
+        <div class="progress" aria-label="执行进度"><div id="bar" class="bar"></div></div>
+        <div class="legend" style="margin-top:0"><span id="progressText">第 0 / 0 步</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cols2">
+    <!-- 左列：代码 + 要点 -->
+    <div>
+      <section class="panel">
+        <h2>Java 代码 · 执行位置 <span class="tag" id="lineTag">未开始</span></h2>
+        <pre class="code" id="code" aria-label="Java 源码"></pre>
+      </section>
+
+      <section class="panel" style="margin-top:18px">
+        <h2>为什么这样写就能成 <span class="tag">核心不变量</span></h2>
+        <ul class="insight">
+          <li><b>两次反转 = 单词顺序颠倒、字母顺序复原。</b>整体反转后 <code>"the sky"</code> 变成 <code>"yks eht"</code>，此时单词的<b>位置</b>反了但<b>字母</b>也反了；再逐词反转一次，字母正回来，位置保持反的 → 正是答案。</li>
+          <li><b>去空格的精髓是"看上一个写进去的字符"。</b><code>c != ' ' || sb.charAt(sb.length()-1) != ' '</code> 靠<b>短路求值</b>工作：c 不是空格就直接追加；c 是空格时才回头看看 sb 末尾是不是空格 —— 是就说明这是"中间多余的空格"，丢掉。</li>
+          <li>为什么 <code>sb.charAt(sb.length()-1)</code> 不会越界？因为前面已经把<b>开头的空格全部掐掉</b>，第一个进入 sb 的字符必定不是空格，所以只要走到"c 是空格"这一步，sb 一定非空。</li>
+          <li><b>三段代码共用同一套双指针模板：</b><code>reverseString(sb, start, end)</code> 是"反转闭区间 [start, end]"的通用工具。整体反转传的是 <b>[0, n-1]</b>；单词反转传的是 <b>[start, end-1]</b>。</li>
+          <li><b>为什么单词区间是 [start, end-1]？</b>因为 <code>end</code> 停下时指向的是<b>空格</b>（或字符串末尾之后），它本身不属于单词，所以要减 1。</li>
+          <li><b>end 为什么从 1 开始、又用 end = start + 1？</b>都是为了跳过"每个单词的第一个字符"——它必然不是空格，检查它纯属浪费。这是<b>不改结果、只省一次判断</b>的小优化，也是这段代码最容易看晕的地方。</li>
+          <li>三个循环边界各不相同：<code>start &lt;= end</code>（闭区间去空格，两端都要处理）、<code>start &lt; end</code>（反转，相遇就停）、<code>end &lt; n</code>（找单词右端，end 允许等于 n 表示"末尾之后"）。</li>
+          <li>复杂度：三次遍历各 O(n)，每个字符在 <code>setCharAt</code> 层面最多被交换一次；额外空间只有新的 StringBuilder，O(n)。</li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- 右列：过程记录表 -->
+    <div>
+      <section class="panel">
+        <h2>过程记录表 <span class="tag">只记录"真正改变了 sb"的动作</span></h2>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>阶段</th><th>关键动作</th><th>此刻的 sb</th></tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="result" id="result"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+/* =========================================================================
+   ①  代码面板
+   ========================================================================= */
+const $ = id => document.getElementById(id);
+
+const CODE = [
+  'class Solution {',
+  '    /**',
+  '     * 不使用 Java 内置方法实现：',
+  '     * 1. 去除首尾以及中间多余空格',
+  '     * 2. 反转整个字符串',
+  '     * 3. 反转各个单词',
+  '     */',
+  '    public String reverseWords(String s) {',
+  '        // 1. 去除首尾以及中间多余空格',
+  '        StringBuilder sb = removeSpace(s);',
+  '        // 2. 反转整个字符串',
+  '        reverseString(sb, 0, sb.length() - 1);',
+  '        // 3. 反转各个单词',
+  '        reverseEachWord(sb);',
+  '        return sb.toString();',
+  '    }',
+  '',
+  '    private StringBuilder removeSpace(String s) {',
+  '        int start = 0;',
+  '        int end = s.length() - 1;',
+  '        // 移除开头和结尾的空格',
+  '        while (s.charAt(start) == \' \') {',
+  '            start++;',
+  '        }',
+  '        while (s.charAt(end) == \' \') {',
+  '            end--;',
+  '        }',
+  '        StringBuilder sb = new StringBuilder();',
+  '        while (start <= end) {',
+  '            char c = s.charAt(start);',
+  '            if (c != \' \' || sb.charAt(sb.length() - 1) != \' \') {',
+  '                sb.append(c);',
+  '            }',
+  '            start++;',
+  '        }',
+  '        return sb;',
+  '    }',
+  '',
+  '    /** 反转字符串指定区间 [start, end] 的字符 */',
+  '    public void reverseString(StringBuilder sb, int start, int end) {',
+  '        while (start < end) {',
+  '            char temp = sb.charAt(start);',
+  '            sb.setCharAt(start, sb.charAt(end));',
+  '            sb.setCharAt(end, temp);',
+  '            start++;',
+  '            end--;',
+  '        }',
+  '    }',
+  '',
+  '    private void reverseEachWord(StringBuilder sb) {',
+  '        int start = 0;',
+  '        int end = 1;',
+  '        int n = sb.length();',
+  '        while (start < n) {',
+  '            while (end < n && sb.charAt(end) != \' \') {',
+  '                end++;',
+  '            }',
+  '            reverseString(sb, start, end - 1);',
+  '            start = end + 1;',
+  '            end = start + 1;',
+  '        }',
+  '    }',
+  '}'
+];
+
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* 单次扫描上色：避免把已经插进标签里的 class= 等文字再次匹配 */
+function hl(line){
+  const t = line.trim();
+  if (t.startsWith('//') || t.startsWith('/*') || t.startsWith('*')) return '<span class="comment">' + esc(line) + '</span>';
+  const re = /(\/\/[^\n]*)|\b(class|public|private|void|int|char|while|if|return|new|StringBuilder|String)\b|\b(reverseWords|removeSpace|reverseString|reverseEachWord|charAt|setCharAt|append|length|toString)\b|\b(\d+)\b/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(line)) !== null){
+    out += esc(line.slice(last, m.index));
+    const piece = esc(m[0]);
+    if (m[1] !== undefined)      out += '<span class="comment">' + piece + '</span>';
+    else if (m[2] !== undefined) out += '<span class="kw">' + piece + '</span>';
+    else if (m[3] !== undefined) out += '<span class="fn">' + piece + '</span>';
+    else                         out += '<span class="num">' + piece + '</span>';
+    last = m.index + m[0].length;
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out + esc(line.slice(last));
+}
+$('code').innerHTML = CODE.map((l,i)=>`<span class="line" data-line="${i+1}"><span class="ln">${i+1}</span>${hl(l) || ' '}</span>`).join('');
+
+/* 用「内容查找」定位行号，避免以后改代码时行号错位 */
+const findLine = (sub, from=0) => { for (let i=from;i<CODE.length;i++) if (CODE[i].includes(sub)) return i+1; return null; };
+const iRewDef = CODE.findIndex(l => l.includes('private void reverseEachWord'));
+const iTrimH1 = CODE.findIndex(l => l.includes("while (s.charAt(start)"));
+const iWhileLe = CODE.findIndex(l => l.includes('while (start <= end)'));
+const iRsWhile = CODE.findIndex(l => l.includes('while (start < end)'));
+const iRewInner = CODE.findIndex(l => l.includes('while (end < n && sb.charAt'));
+const L = {
+  call:      findLine('StringBuilder sb = removeSpace(s);'),
+  revAll:    findLine('reverseString(sb, 0, sb.length() - 1);'),
+  each:      findLine('reverseEachWord(sb);'),
+  ret:       findLine('return sb.toString();'),
+  mStart:    findLine('int start = 0;'),
+  mEnd:      findLine('int end = s.length() - 1;'),
+  trimH1:    iTrimH1 + 1,
+  trimH2:    findLine('start++;', iTrimH1),
+  trimT1:    findLine("while (s.charAt(end)"),
+  trimT2:    findLine('end--;'),
+  newSb:     findLine('new StringBuilder()'),
+  whileLe:   iWhileLe + 1,
+  charC:     findLine('char c = s.charAt(start);'),
+  ifCond:    findLine('if (c != '),
+  append:    findLine('sb.append(c);'),
+  startInc:  findLine('start++;', iWhileLe),
+  retSb:     findLine('return sb;'),
+  rsWhile:   iRsWhile + 1,
+  rsTemp:    findLine('char temp = sb.charAt(start);'),
+  rsSet1:    findLine('sb.setCharAt(start, sb.charAt(end));'),
+  rsSet2:    findLine('sb.setCharAt(end, temp);'),
+  rsInc:     findLine('start++;', iRsWhile),
+  rsDec:     findLine('end--;', iRsWhile),
+  rewStart:  findLine('int start = 0;', iRewDef),
+  rewEnd:    findLine('int end = 1;'),
+  rewN:      findLine('int n = sb.length();'),
+  rewWhile:  findLine('while (start < n)'),
+  rewInner:  iRewInner + 1,
+  rewInc:    findLine('end++;', iRewInner),
+  rewCall:   findLine('reverseString(sb, start, end - 1);'),
+  rewStartS: findLine('start = end + 1;'),
+  rewEndS:   findLine('end = start + 1;')
+};
+
+/* =========================================================================
+   ②  引擎：完全照着 Java 代码逐行模拟，每一步录一份状态快照
+   ========================================================================= */
+const PHASES = ['准备', '① 去多余空格', '② 整体反转', '③ 逐词反转', '✅ 完成'];
+const showCh = ch => ch === ' ' ? '␣' : ch;
+const visStr = t => esc(String(t).replace(/ /g, '␣'));
+
+function buildSteps(input){
+  const steps = [], meta = { original: input };
+  const sChars = input.split('');
+  const N = sChars.length;
+  let start = 0, end = N - 1;
+  let sb = [];
+  let turn = 0;               // 整体反转的轮次
+  let wordNo = 0;             // 单词序号
+
+  /* ---- 行快照工厂：rowS = 原串那一行，rowB = StringBuilder 那一行 ---- */
+  function rowS(o){
+    const r = { chars: sChars.slice(), ptrs: [], recent: [], hl: [], dim: [], groups: [] };
+    if (start >= 0 && start <= N) r.ptrs.push({ name:'start', idx:start, side:'i' });
+    if (end >= -1 && end <= N)    r.ptrs.push({ name:'end',   idx:end,   side:'j' });
+    for (let k=0;k<N;k++) if (k < start || k > end) r.dim.push(k);
+    return Object.assign(r, o || {});
+  }
+  function rowB(o){
+    const r = { chars: sb.slice(), ptrs: [], recent: [], hl: [], dim: [], groups: [] };
+    return Object.assign(r, o || {});
+  }
+  const add = o => steps.push(Object.assign(
+    { phase:0, line:null, sRow:null, sbRow:null, vars:[], desc:'', log:null }, o));
+
+  /* ---------------- 准备 ---------------- */
+  add({ phase:0, line:L.call, sRow:rowS(), sbRow:rowB(),
+    vars:[['s.length()', N, 'v-ch']],
+    desc:`调用 <b>reverseWords("${visStr(input)}")</b>，长度 ${N}。<br>整个方法只做三件事：<b>① 去多余空格 → ② 整体反转 → ③ 每个单词内部再反转</b>。下面逐个变量跟踪。` });
+
+  /* ================= 阶段 1：removeSpace ================= */
+  add({ phase:1, line:L.mStart, sRow:rowS(), sbRow:rowB(),
+    vars:[['start', 0, 'v-i']],
+    desc:`进入 <b>removeSpace(s)</b>。<b>int start = 0</b>：start 从最左端出发，负责跳过<b>开头</b>的空格。` });
+  add({ phase:1, line:L.mEnd, sRow:rowS(), sbRow:rowB(),
+    vars:[['start', start, 'v-i'], ['end', N-1, 'v-j']],
+    desc:`<b>int end = s.length() - 1 = ${N-1}</b>：end 从最右端出发，负责跳过<b>结尾</b>的空格。两个指针一个往右、一个往左，先把"外圈"的空格削掉。` });
+
+  /* --- 掐掉开头空格 --- */
+  let guard = 0;
+  while (start < N && sChars[start] === ' ' && guard++ < 500){
+    const old = start; start++;
+    add({ phase:1, line:L.trimH2, sRow:rowS({ recent:[old] }), sbRow:rowB(),
+      vars:[['start', start, 'v-i'], ['end', end, 'v-j'], ["s.charAt(" + old + ")", "'␣'", 'v-ch']],
+      desc:`<b>s.charAt(${old}) = '␣'</b>，是空格 → 条件成立 → 执行 <b>start++</b>：start 从 ${old} 变成 <b>${start}</b>（被跳过的那个空格已标灰）。` });
+  }
+  add({ phase:1, line:L.trimH1, sRow:rowS(), sbRow:rowB(),
+    vars:[['start', start, 'v-i'], ['end', end, 'v-j'],
+          ["s.charAt(" + Math.min(start, Math.max(N-1,0)) + ")",
+           start < N ? `'${visStr(showCh(sChars[start]))}'` : '（越界）', 'v-ch']],
+    desc: start < N
+      ? `<b>s.charAt(${start}) = '${visStr(showCh(sChars[start]))}'</b>，不是空格 → 循环条件为 false，跳出。开头的空格清理完毕，<b>start 停在 ${start}</b>。`
+      : `<span class="warn">整个字符串都是空格</span>：start 已经走到 s.length()。注意原代码这里是 <code>while(s.charAt(start)==' ')</code>，没有边界判断，这种输入会抛 StringIndexOutOfBoundsException；本页做了保护（题目保证至少有一个单词，所以正常输入不会碰到）。`,
+    log: { op:'开头空格清理完毕', sb: sb.join('') } });
+
+  /* --- 掐掉结尾空格 --- */
+  guard = 0;
+  while (end >= 0 && sChars[end] === ' ' && guard++ < 500){
+    const old = end; end--;
+    add({ phase:1, line:L.trimT2, sRow:rowS({ recent:[old] }), sbRow:rowB(),
+      vars:[['start', start, 'v-i'], ['end', end, 'v-j'], ["s.charAt(" + old + ")", "'␣'", 'v-ch']],
+      desc:`<b>s.charAt(${old}) = '␣'</b>，是空格 → 条件成立 → 执行 <b>end--</b>：end 从 ${old} 变成 <b>${end}</b>。` });
+  }
+  add({ phase:1, line:L.trimT1, sRow:rowS(), sbRow:rowB(),
+    vars:[['start', start, 'v-i'], ['end', end, 'v-j'],
+          ["s.charAt(" + Math.max(end,0) + ")", end >= 0 ? `'${visStr(showCh(sChars[end]))}'` : '（越界）', 'v-ch']],
+    desc: end >= 0
+      ? `<b>s.charAt(${end}) = '${visStr(showCh(sChars[end]))}'</b>，不是空格 → 跳出。结尾空格清理完毕，<b>end 停在 ${end}</b>。<br>现在 <b>[start, end] = [${start}, ${end}]</b> 就是"真正有效的那一段"。`
+      : `<span class="warn">end 已经小于 0</span>，字符串里没有非空格字符。`,
+    log: { op:'结尾空格清理完毕', sb: sb.join('') } });
+
+  add({ phase:1, line:L.newSb, sRow:rowS(), sbRow:rowB(),
+    vars:[['start', start, 'v-i'], ['end', end, 'v-j'], ['sb.length()', 0, 'v-ch']],
+    desc:`<b>new StringBuilder()</b>：准备一个空 sb，用来装"去掉多余空格"的结果。接下来是逐字符搬运，中间连续的空格要靠 sb 自己的末尾来判断。` });
+
+  /* --- 逐字符搬运，顺便干掉中间连续空格 --- */
+  guard = 0;
+  while (start <= end && guard++ < 3000){
+    const cur = start, c = sChars[cur];
+    add({ phase:1, line:L.charC, sRow:rowS({ recent:[cur] }), sbRow:rowB(),
+      vars:[['start', cur, 'v-i'], ['end', end, 'v-j'], ['c', `'${visStr(showCh(c))}'`, 'v-ch'], ['sb.length()', sb.length, 'v-ch']],
+      desc:`<b>char c = s.charAt(${cur})</b> = '<b>${visStr(showCh(c))}</b>'，把这个字符取出来，准备判断要不要写进 sb。` });
+
+    const cond = (c !== ' ') || (sb[sb.length-1] !== ' ');
+    if (cond){
+      sb.push(c);
+      add({ phase:1, line:L.append, sRow:rowS({ recent:[cur] }), sbRow:rowB({ hl:[sb.length-1] }),
+        vars:[['start', cur, 'v-i'], ['end', end, 'v-j'], ['c', `'${visStr(showCh(c))}'`, 'v-ch'], ['sb.length()', sb.length, 'v-ch']],
+        desc: c !== ' '
+          ? `判断 <b>c != ' '</b> 直接成立（短路：后面的 sb.charAt 根本不用算）→ <b>sb.append('${visStr(showCh(c))}')</b>，sb = "${visStr(sb.join(''))}"。`
+          : `c 是空格，于是看后半句 <b>sb.charAt(sb.length()-1) != ' '</b>：sb 末尾是 '${visStr(showCh(sb[sb.length-2]))}'，不是空格 → 条件成立 → 这个空格<b>是单词之间的间隔，必须保留</b>，append 进去。`,
+        log: { op:`sb.append('${showCh(c)}')`, sb: sb.join('') } });
+    } else {
+      add({ phase:1, line:L.ifCond, sRow:rowS({ recent:[cur] }), sbRow:rowB(),
+        vars:[['start', cur, 'v-i'], ['end', end, 'v-j'], ['c', "'␣'", 'v-ch'], ['sb.length()', sb.length, 'v-ch']],
+        desc:`c 是空格，而后半句 <b>sb.charAt(${sb.length-1}) = '␣'</b> 也是空格 → 整个条件不成立 → <b>这个空格被丢弃</b>，sb 不变。这就是"中间多余空格"被消掉的地方。`,
+        log: { op:`丢弃多余空格（下标 ${cur}）`, sb: sb.join('') } });
+    }
+    start++;
+  }
+  meta.afterTrim = sb.join('');
+  add({ phase:1, line:L.retSb, sRow:null, sbRow:rowB(),
+    vars:[['sb', `"${visStr(sb.join(''))}"`, 'v-str'], ['sb.length()', sb.length, 'v-ch']],
+    desc:`<b>start(${start}) &gt; end(${end})</b>，循环结束，<b>return sb</b>。<br>第 1 步完成：sb = "<b>${visStr(sb.join(''))}</b>"（首、尾、中间的多余空格全部清掉，单词之间只留 1 个空格）。`,
+    log: { op:'① 去空格完成', sb: sb.join('') } });
+
+  /* ================= 阶段 2：整体反转 ================= */
+  const n1 = sb.length;
+  add({ phase:2, line:L.revAll, sbRow:rowB(),
+    vars:[['参数 start', 0, 'v-i'], ['参数 end', n1-1, 'v-j'], ['sb.length()', n1, 'v-ch']],
+    desc:`<b>reverseString(sb, 0, ${n1-1})</b>：复用"反转闭区间"工具，把整串从两头往中间夹逼交换。注意这时单词的<b>位置和字母顺序都被颠倒了</b>，下一步再修字母。` });
+
+  let i = 0, j = n1 - 1;
+  while (i < j){
+    const a = sb[i], b = sb[j];
+    sb[i] = b; sb[j] = a;
+    turn++;
+    add({ phase:2, line:L.rsSet2,
+      sbRow: rowB({ ptrs:[{name:'start',idx:i,side:'i'},{name:'end',idx:j,side:'j'}], hl:[i,j] }),
+      vars:[['start', i, 'v-i'], ['end', j, 'v-j'], ['temp', `'${visStr(showCh(a))}'`, 'v-ch'], ['轮次', turn, 'v-ch']],
+      desc:`第 ${turn} 轮：<b>char temp = sb[${i}] = '${visStr(showCh(a))}'</b> → <b>sb[${i}] = sb[${j}] = '${visStr(showCh(b))}'</b> → <b>sb[${j}] = temp = '${visStr(showCh(a))}'</b>，两个字符换位。然后 start++ / end-- 继续往里缩。`,
+      log: { op:`整体反转：交换 ${i} ↔ ${j}`, sb: sb.join('') } });
+    i++; j--;
+  }
+  meta.afterReverse = sb.join('');
+  add({ phase:2, line:L.rsWhile, sbRow:rowB(),
+    vars:[['start', i, 'v-i'], ['end', j, 'v-j']],
+    desc:`<b>start(${i}) &gt;= end(${j})</b>，while 不再成立，reverseString 返回。<br>第 2 步完成：sb = "<b>${visStr(sb.join(''))}</b>"。现在整串是倒着的，但每个单词内部也是倒着的 —— 下一步把它<b>按单词</b>各修一次。`,
+    log: { op:'② 整体反转完成', sb: sb.join('') } });
+
+  /* ================= 阶段 3：逐词反转 ================= */
+  let ws = 0, we = 1;
+  const n2 = sb.length;
+  add({ phase:3, line:L.rewStart, sbRow:rowB({ ptrs:[{name:'start',idx:0,side:'i'},{name:'end',idx:1,side:'j'}] }),
+    vars:[['start', 0, 'v-i'], ['end', 1, 'v-j'], ['n', n2, 'v-ch']],
+    desc:`进入 reverseEachWord。<b>int start = 0</b> 记住当前单词的左端；<b>int end = 1</b> —— 注意它从 <b>1</b> 而不是 0 开始：走这一步是因为第 0 个字符必然不是空格，不用检查它。` });
+  add({ phase:3, line:L.rewN, sbRow:rowB({ ptrs:[{name:'start',idx:0,side:'i'},{name:'end',idx:1,side:'j'}] }),
+    vars:[['start', 0, 'v-i'], ['end', 1, 'v-j'], ['n', n2, 'v-ch']],
+    desc:`<b>int n = sb.length() = ${n2}</b>，它是"末尾之后"的边界：end 允许走到 n，表示已经到字符串尾部了。` });
+
+  guard = 0;
+  while (ws < n2 && guard++ < 500){
+    add({ phase:3, line:L.rewWhile,
+      sbRow: rowB({ ptrs:[{name:'start',idx:ws,side:'i'},{name:'end',idx:we,side:'j'}] }),
+      vars:[['start', ws, 'v-i'], ['end', we, 'v-j'], ['n', n2, 'v-ch']],
+      desc:`<b>start(${ws}) &lt; n(${n2})</b> 成立 → 还有单词没处理。现在用 end 从当前单词的<b>第二个字符</b>往后找间隔，确定这个单词到哪结束。` });
+
+    while (we < n2 && sb[we] !== ' '){
+      const examined = we; we++;
+      add({ phase:3, line:L.rewInc,
+        sbRow: rowB({ ptrs:[{name:'start',idx:ws,side:'i'},{name:'end',idx:we,side:'j'}],
+                      recent:[examined], groups:[{from:ws, to:we-1}] }),
+        vars:[['start', ws, 'v-i'], ['end', we, 'v-j'],
+              ['被检查的字符', `'${visStr(showCh(sb[examined]))}'`, 'v-ch']],
+        desc:`<b>end &lt; n</b> 且 <b>sb.charAt(${examined}) = '${visStr(showCh(sb[examined]))}' != ' '</b> → 还在同一个单词里 → 执行 <b>end++</b>，end 变成 <b>${we}</b>，绿色区间就是"目前认定属于这个单词的部分"。` });
+    }
+
+    const word = sb.slice(ws, we).join('');
+    wordNo++;
+    add({ phase:3, line:L.rewInner,
+      sbRow: rowB({ ptrs:[{name:'start',idx:ws,side:'i'},{name:'end',idx:we,side:'j'}],
+                    groups:[{from:ws, to:we-1}] }),
+      vars:[['start', ws, 'v-i'], ['end', we, 'v-j'], ['区间', `[${ws}, ${we-1}]`, 'v-str']],
+      desc: we < n2
+        ? `<b>sb.charAt(${we}) = '␣'</b>（空格）→ 内层 while 结束。end 停在<b>空格</b>上，所以这个单词的真正范围是 <b>[start, end-1] = [${ws}, ${we-1}]</b>，内容是 "<b>${visStr(word)}</b>"。`
+        : `<b>end 已经等于 n(${n2})</b> → 内层 while 结束，说明这是最后一个单词。范围 <b>[start, end-1] = [${ws}, ${we-1}]</b>，内容 "<b>${visStr(word)}</b>"。`,
+      log: { op:`第 ${wordNo} 个单词：区间 [${ws}, ${we-1}] = "${word}"`, sb: sb.join('') } });
+
+    add({ phase:3, line:L.rewCall,
+      sbRow: rowB({ ptrs:[{name:'start',idx:ws,side:'i'},{name:'end',idx:we,side:'j'}], groups:[{from:ws,to:we-1}] }),
+      vars:[['start', ws, 'v-i'], ['end', we, 'v-j'], ['调用', `reverseString(sb, ${ws}, ${we-1})`, 'v-str']],
+      desc:`<b>reverseString(sb, ${ws}, ${we-1})</b>：把 sb 上 [${ws}, ${we-1}] 这一段就地反转回正常字母序（工具方法还是那个双指针模板，只是区间变窄了）。` });
+
+    let a = ws, b = we - 1;
+    while (a < b){
+      const ca = sb[a], cb = sb[b];
+      sb[a] = cb; sb[b] = ca;
+      add({ phase:3, line:L.rsSet2,
+        sbRow: rowB({ ptrs:[{name:'start',idx:a,side:'i'},{name:'end',idx:b,side:'j'}], hl:[a,b], groups:[{from:ws,to:we-1}] }),
+        vars:[['内层 i', a, 'v-i'], ['内层 j', b, 'v-j'], ['temp', `'${visStr(showCh(ca))}'`, 'v-ch'], ['区间', `[${ws}, ${we-1}]`, 'v-str']],
+        desc:`单词内交换：<b>temp = sb[${a}] = '${visStr(showCh(ca))}'</b> → <b>sb[${a}] = '${visStr(showCh(cb))}'</b> → <b>sb[${b}] = '${visStr(showCh(ca))}'</b>。这里换了名字的 start/end 是 reverseString 的<b>形参</b>，和外面的 start/end 互不影响（Java 值传递）。`,
+        log: { op:`单词内交换 ${a} ↔ ${b}`, sb: sb.join('') } });
+      a++; b--;
+    }
+
+    add({ phase:3, line:L.rsWhile,
+      sbRow: rowB({ ptrs:[{name:'start',idx:ws,side:'i'},{name:'end',idx:we,side:'j'}], groups:[{from:ws,to:we-1}] }),
+      vars:[['区间', `[${ws}, ${we-1}]`, 'v-str'], ['现在的内容', `"${visStr(sb.slice(ws,we).join(''))}"`, 'v-str']],
+      desc:`这个单词反转完成，[${ws}, ${we-1}] 现在是 "<b>${visStr(sb.slice(ws,we).join(''))}</b>"。`,
+      log: { op:`单词已修正："${sb.slice(ws,we).join('')}"`, sb: sb.join('') } });
+
+    const oldWe = we;
+    ws = we + 1; we = ws + 1;
+    add({ phase:3, line:L.rewEndS,
+      sbRow: rowB({ ptrs:[{name:'start',idx:ws,side:'i'},{name:'end',idx:we,side:'j'}] }),
+      vars:[['start', ws, 'v-i'], ['end', we, 'v-j'],
+            ['本步依据', `end 原来是 ${oldWe}`, 'v-str']],
+      desc:`<b>start = end + 1 = ${ws}</b>：跳过那个空格，指向下一个单词的首字母；<b>end = start + 1 = ${we}</b>：又跳过新单词的首字母（它必然不是空格）。两个指针一起跳到下一个单词上。` });
+  }
+
+  add({ phase:3, line:L.rewWhile, sbRow:rowB(),
+    vars:[['start', ws, 'v-i'], ['n', n2, 'v-ch']],
+    desc:`<b>start = ${ws}</b> 不再小于 n = ${n2}，外层 while 结束，reverseEachWord 返回。所有单词都已就位。`,
+    log: { op:'③ 逐词反转完成', sb: sb.join('') } });
+
+  meta.final = sb.join('');
+  add({ phase:4, line:L.ret, sbRow:rowB(),
+    vars:[['sb', `"${visStr(sb.join(''))}"`, 'v-str'], ['共走了', steps.length + 1, 'v-ch']],
+    desc:`<b>return sb.toString()</b> → "<b>${visStr(sb.join(''))}</b>"。<br>全程没有新建第二个数组，也没有调用任何 <code>split / trim / reverse</code>：只是"<b>先去空格、再整串翻转、最后逐词翻转</b>"这三趟遍历。`,
+    log: { op:'✅ 返回结果', sb: sb.join('') } });
+
+  /* 给每一步的日志编号，供记录表高亮当前行 */
+  let li = 0;
+  steps.forEach(s => { if (s.log){ s.logIndex = li++; } });
+
+  return { steps, meta };
+}
+
+/* =========================================================================
+   ③  渲染
+   ========================================================================= */
+let STEPS = [], META = null, cur = 0, timer = null, LOGS = [];
+
+function renderRow(cellsEl, ptrEl, row){
+  const n = row.chars.length;
+  const negPtrs = row.ptrs.filter(p => p.idx < 0);          // 指针跑到左边界之外（只有"全是空格"才会出现）
+  const cols = [];
+  if (negPtrs.length) cols.push({ neg:true });
+  for (let k = 0; k < n; k++) cols.push({ k: k });
+  if (n > 0) cols.push({ ghost:true });                     // 末尾之后的那一格：n 本身也是一个合法落点
+
+  let cHtml = '', pHtml = '';
+  cols.forEach(col => {
+    let boxCls = '', content = '', idxLabel = '', ptrs = [];
+    if (col.neg){
+      boxCls = 'ghost'; content = '∅'; idxLabel = negPtrs[0].idx; ptrs = negPtrs;
+    } else if (col.ghost){
+      ptrs = row.ptrs.filter(p => p.idx >= n);
+      boxCls = 'ghost'; content = '∅';
+      idxLabel = ptrs.length ? Math.max.apply(null, ptrs.map(p => p.idx)) : n;
+    } else {
+      const k = col.k, ch = row.chars[k];
+      if (ch === ' ') boxCls += ' space';
+      if (row.dim.indexOf(k) >= 0) boxCls += ' pending';
+      if (row.groups.some(g => k >= g.from && k <= g.to)) boxCls += ' word';
+      if (row.hl.indexOf(k) >= 0) boxCls += ' cur-write';
+      if (row.recent.indexOf(k) >= 0) boxCls += ' cur-i';
+      content = (ch === ' ') ? '␣' : esc(ch);
+      idxLabel = k;
+      ptrs = row.ptrs.filter(p => p.idx === k);
+    }
+    cHtml += `<div class="col"><div class="idx">${idxLabel}</div><div class="box${boxCls}">${content}</div></div>`;
+    let b = '<div class="col"><div class="badges">';
+    ptrs.forEach(p => {
+      const label = (p.idx === n) ? p.name : (p.name + '=' + p.idx);
+      b += `<span class="arrow a${p.side}">▲</span><span class="pill ${p.side}">${esc(label)}</span>`;
+    });
+    pHtml += b + '</div></div>';
+  });
+  cellsEl.innerHTML = cHtml || '<div class="empty">（空字符串，还没有任何字符被写进来）</div>';
+  ptrEl.innerHTML = pHtml;
+}
+
+function buildLogs(){
+  LOGS = [];
+  STEPS.forEach(s => { if (s.log) LOGS.push(s); });
+  const tb = $('tbody'); tb.innerHTML = '';
+  LOGS.forEach((s, k) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="mono">${k+1}</td><td class="ph">${PHASES[s.phase]}</td>`
+                 + `<td class="mono">${esc(s.log.op)}</td><td class="mono ok">"${visStr(s.log.sb)}"</td>`;
+    tb.append(tr);
+  });
+}
+
+function render(){
+  const st = STEPS[cur];
+
+  /* 阶段胶囊 */
+  document.querySelectorAll('.phz').forEach(el => {
+    const p = +el.dataset.p;
+    el.classList.toggle('on', p === st.phase);
+    el.classList.toggle('done', p < st.phase);
+  });
+  $('phaseTag').textContent = PHASES[st.phase];
+
+  /* 代码高亮 */
+  document.querySelectorAll('#code .line').forEach(el => {
+    el.classList.toggle('active', +el.dataset.line === st.line);
+  });
+  $('lineTag').textContent = st.line ? '正在执行第 ' + st.line + ' 行' : '未开始';
+  const act = document.querySelector('#code .line.active');
+  if (act && act.scrollIntoView) { /* 让高亮行尽量留在视野内 */
+    const box = $('code'), top = act.offsetTop - box.offsetTop;
+    if (top < box.scrollTop || top > box.scrollTop + box.clientHeight - 40)
+      box.scrollTop = Math.max(0, top - box.clientHeight / 2);
+  }
+
+  /* 两行字符 */
+  const showS = !!st.sRow;
+  $('headS').style.display = showS ? '' : 'none';
+  $('cellRowS').style.display = showS ? '' : 'none';
+  $('ptrRowS').style.display = showS ? '' : 'none';
+  $('sep').style.display = showS ? '' : 'none';
+  if (showS) renderRow($('cellRowS'), $('ptrRowS'), st.sRow);
+  renderRow($('cellRowB'), $('ptrRowB'), st.sbRow);
+
+  /* 变量卡片 */
+  $('vars').innerHTML = st.vars.map(v =>
+    `<div class="var"><div class="name">${esc(v[0])}</div><div class="value ${v[2] || ''}">${esc(v[1])}</div></div>`
+  ).join('');
+
+  /* 说明 */
+  $('desc').innerHTML = st.desc;
+
+  /* 进度 */
+  const pct = STEPS.length > 1 ? (cur / (STEPS.length - 1)) * 100 : 100;
+  $('bar').style.width = pct + '%';
+  $('progressText').textContent = `第 ${cur} / ${STEPS.length - 1} 步` + (cur === STEPS.length - 1 ? '（已结束）' : '');
+  $('stepTag').textContent = `第 ${cur} 步`;
+
+  /* 记录表高亮 */
+  document.querySelectorAll('#tbody tr').forEach((tr, k) => {
+    tr.classList.toggle('cur', st.logIndex !== undefined && k === st.logIndex);
+  });
+
+  $('prev').disabled = (cur === 0);
+  $('step').disabled = (cur === STEPS.length - 1);
+
+  /* 结果链 */
+  $('result').innerHTML =
+    `<div class="chain">`
+    + `<span class="cbox"><small>原始 s</small>"${visStr(META.original)}"</span><span>→</span>`
+    + `<span class="cbox"><small>① 去空格后</small>"${visStr(META.afterTrim)}"</span><span>→</span>`
+    + `<span class="cbox"><small>② 整体反转后</small>"${visStr(META.afterReverse)}"</span><span>→</span>`
+    + `<span class="cbox"><small>③ 逐词反转后（答案）</small>"${visStr(META.final)}"</span>`
+    + `</div>`
+    + (cur === STEPS.length - 1 ? `<div style="margin-top:8px">✅ 执行完毕：<b>"${visStr(META.final)}"</b></div>`
+       : `<div style="margin-top:8px;color:#9fb3ca">这是三次遍历的最终效果，播放到最后一步会再提示一次。</div>`);
+}
+
+/* =========================================================================
+   ④  控制
+   ========================================================================= */
+function stop(){ if (timer){ clearInterval(timer); timer = null; $('play').textContent = '▶ 自动播放'; } }
+function next(){ if (cur < STEPS.length - 1){ cur++; render(); } else stop(); }
+function prev(){ if (cur > 0){ cur--; render(); } }
+
+function load(){
+  let raw = $('input').value;
+  if (raw.length > 44) raw = raw.slice(0, 44);
+  if (raw.length === 0) raw = '  hello   world  ';
+  $('input').value = raw;
+  const r = buildSteps(raw);
+  STEPS = r.steps; META = r.meta;
+  cur = 0;
+  buildLogs();
+  render();
+}
+
+$('phaseRow').innerHTML = PHASES.map((p,i) => `<span class="phz" data-p="${i}">${p}</span>`).join('');
+$('step').onclick  = () => { stop(); next(); };
+$('prev').onclick  = () => { stop(); prev(); };
+$('reset').onclick = () => { stop(); cur = 0; render(); };
+$('play').onclick = () => {
+  if (timer){ stop(); return; }
+  if (cur === STEPS.length - 1) cur = 0;
+  $('play').textContent = '⏸ 暂停';
+  timer = setInterval(next, +$('speed').value);
+};
+$('speed').onchange = () => { if (timer){ stop(); $('play').click(); } };
+$('input').onchange = () => { stop(); load(); };
+$('preset1').onclick = () => { stop(); $('input').value = '  hello   world  '; load(); };
+$('preset2').onclick = () => { stop(); $('input').value = 'the sky is blue'; load(); };
+$('preset3').onclick = () => { stop(); $('input').value = 'a good   example'; load(); };
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'ArrowRight'){ e.preventDefault(); stop(); next(); }
+  if (e.key === 'ArrowLeft'){ e.preventDefault(); stop(); prev(); }
+  if (e.code === 'Space'){ e.preventDefault(); $('play').click(); }
+});
+
+$('input').value = '  hello   world  ';
+load();
+</script>
+</body>
+</html>

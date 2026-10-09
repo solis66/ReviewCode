@@ -107,6 +107,22 @@
       "theme": "dark",
       "summary": "fastIndex 只读不回头，slowIndex 只写不后退。逐步观察需要保留的元素如何原地搬到数组前段，以及被跳过的 val 是如何被覆盖掉的。",
       "complexity": "时间 O(n) · 空间 O(1)"
+    },
+
+    "leetcode_151_反转字符串中的单词.html": {
+      "id": "151-reverse-words-in-a-string",
+      "order": 7,
+      "no": "151",
+      "platform": "LeetCode",
+      "title": "反转字符串中的单词",
+      "subtitle": "三步走 · 下标指针",
+      "categories": ["字符串", "双指针法"],
+      "tags": ["双指针", "整体反转", "逐词反转", "去除多余空格"],
+      "level": "中等",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "禁用 split / trim / reverse，只用 StringBuilder 和几个下标指针：先去首尾与中间多余空格，再整体反转，最后逐词反转回来。每一步都摆出 start、end、c、sb 的真实取值，看清「两次反转 = 位置颠倒而字母复原」这个不变量。",
+      "complexity": "时间 O(n) · 空间 O(n)"
     }
   }
 }

@@ -1,7 +1,7 @@
 /* 本文件由 tools/build.py 自动生成，重新运行脚本会覆盖。
    小改文案可以直接手改，但下次 build 会被 meta.json 里的值覆盖。 */
 window.__PROBLEMS__ = {
-  "generatedAt": "2026-10-08 16:10:29",
+  "generatedAt": "2026-10-09 16:12:15",
   "site": {
     "title": "代码随想录刷题同步算法原理可视化site",
     "subtitle": "",
@@ -166,6 +166,35 @@ window.__PROBLEMS__ = {
       "fingerprint": "943393e167",
       "updated": "2026-10-08 15:30",
       "source": "leetcode_27_移除元素.html"
+    },
+    {
+      "id": "151-reverse-words-in-a-string",
+      "order": 7,
+      "no": "151",
+      "platform": "LeetCode",
+      "title": "反转字符串中的单词",
+      "subtitle": "三步走 · 下标指针",
+      "categories": [
+        "字符串",
+        "双指针法"
+      ],
+      "tags": [
+        "双指针",
+        "整体反转",
+        "逐词反转",
+        "去除多余空格"
+      ],
+      "level": "中等",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "禁用 split / trim / reverse，只用 StringBuilder 和几个下标指针：先去首尾与中间多余空格，再整体反转，最后逐词反转回来。每一步都摆出 start、end、c、sb 的真实取值，看清「两次反转 = 位置颠倒而字母复原」这个不变量。",
+      "complexity": "时间 O(n) · 空间 O(n)",
+      "category": "字符串",
+      "file": "problems/151-reverse-words-in-a-string.html",
+      "bytes": 44197,
+      "fingerprint": "d9b6dce069",
+      "updated": "2026-10-09 15:37",
+      "source": "leetcode_151_反转字符串中的单词.html"
     }
   ]
 };
