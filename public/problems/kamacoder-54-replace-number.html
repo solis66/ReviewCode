@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KamaCoder 54 · 替换数字（算法动画演示）</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --bg2:#121a33;
+    --panel:rgba(255,255,255,.045);
+    --panel-brd:rgba(255,255,255,.10);
+    --txt:#e8eefc;
+    --muted:#93a2c4;
+    --blue:#4c8dff;
+    --blue-soft:#1d2b4d;
+    --green:#2ee08a;
+    --green-soft:#10382a;
+    --amber:#ffc857;
+    --orange:#ff8c42;
+    --pink:#ff6fa5;
+    --cell:46px;
+    --gap:6px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 600px at 12% -8%, #1a2a55 0%, transparent 60%),
+      radial-gradient(900px 500px at 95% 0%, #2a1a45 0%, transparent 55%),
+      linear-gradient(180deg,var(--bg),#070a14 70%);
+    color:var(--txt);
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    padding:22px 20px 46px;
+  }
+  .app{max-width:1520px;margin:0 auto}
+
+  /* ---------- 顶部标题 ---------- */
+  header.top{
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;
+    margin-bottom:16px;
+  }
+  header.top h1{
+    margin:0;font-size:24px;letter-spacing:.5px;
+    background:linear-gradient(90deg,#7fb4ff,#b98cff 55%,#ff9ec4);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header.top .sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.6}
+  .kbd{font-family:Consolas,monospace;background:#1b2440;border:1px solid #2c3a5e;border-radius:5px;padding:1px 6px;font-size:12px;color:#cdd9f5}
+
+  /* ---------- 布局 ---------- */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:16px;align-items:start}
+  @media (max-width:1180px){ .layout{grid-template-columns:minmax(0,1fr)} }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-brd);
+    border-radius:14px;
+    padding:14px 16px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    margin-bottom:14px;
+  }
+  .card h2{
+    margin:0 0 12px;font-size:13px;font-weight:600;letter-spacing:1.4px;
+    color:#a9bbe4;text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .card h2::before{content:"";width:4px;height:14px;border-radius:3px;background:linear-gradient(180deg,#6aa5ff,#a06bff)}
+
+  /* ---------- 控制区 ---------- */
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .row + .row{margin-top:12px}
+  input[type=text]{
+    flex:1 1 240px;min-width:180px;
+    background:#0d1428;border:1px solid #2b3a5e;border-radius:10px;
+    color:var(--txt);padding:10px 13px;font-size:15px;font-family:Consolas,"Courier New",monospace;
+    outline:none;transition:.2s;
+  }
+  input[type=text]:focus{border-color:#4c8dff;box-shadow:0 0 0 3px rgba(76,141,255,.18)}
+  button{
+    background:#1a2542;color:#dbe6ff;border:1px solid #2e3d63;border-radius:10px;
+    padding:9px 14px;font-size:13.5px;cursor:pointer;transition:.16s;font-family:inherit;
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  }
+  button:hover:not(:disabled){background:#243257;border-color:#4a5f96;transform:translateY(-1px)}
+  button:active:not(:disabled){transform:translateY(0)}
+  button:disabled{opacity:.38;cursor:not-allowed}
+  button.primary{background:linear-gradient(135deg,#2f6bff,#7a4dff);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(70,110,255,.32)}
+  button.primary:hover:not(:disabled){filter:brightness(1.09)}
+  button.ghost{background:transparent}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .chip{
+    background:#141d36;border:1px dashed #33456e;color:#a9bbe4;border-radius:999px;
+    padding:5px 12px;font-size:12.5px;cursor:pointer;font-family:Consolas,monospace;transition:.16s;
+  }
+  .chip:hover{background:#1d2a4c;color:#e8eefc;border-color:#5b76b8}
+  label.slabel{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+  input[type=range]{accent-color:#6aa5ff;cursor:pointer}
+  input[type=range].scrub{width:100%;margin-top:4px}
+
+  /* ---------- 变量面板 ---------- */
+  .vars{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px}
+  .vbox{
+    background:linear-gradient(180deg,#141d36,#111830);
+    border:1px solid #263354;border-radius:11px;padding:9px 11px;position:relative;overflow:hidden;
+  }
+  .vbox .k{font-size:11px;color:#8fa1c8;letter-spacing:.6px;font-family:Consolas,monospace}
+  .vbox .v{font-size:23px;font-weight:700;font-family:Consolas,monospace;margin-top:3px;color:#dfe9ff}
+  .vbox.i .v{color:var(--orange)}
+  .vbox.j .v{color:var(--pink)}
+  .vbox.c .v{color:var(--amber)}
+  .vbox.changed{animation:pop .5s ease}
+  .vbox.changed::after{
+    content:"";position:absolute;inset:0;border-radius:11px;border:1px solid rgba(120,180,255,.85);
+    animation:fadeRing .6s ease forwards;
+  }
+  @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.055)}100%{transform:scale(1)}}
+  @keyframes fadeRing{from{opacity:1}to{opacity:0}}
+
+  /* ---------- 步骤解说 ---------- */
+  .narr{display:flex;gap:12px;align-items:flex-start;min-height:74px}
+  .badge{
+    flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.5px;
+    padding:5px 11px;border-radius:999px;background:#1c2a4d;border:1px solid #35486f;color:#bcd0f7;
+    white-space:nowrap;margin-top:2px;
+  }
+  .narr .txt{font-size:14.5px;line-height:1.75;color:#dbe4f7}
+  .narr .txt code{
+    font-family:Consolas,monospace;background:#101a30;border:1px solid #26375c;
+    padding:1px 6px;border-radius:5px;color:#9fd0ff;font-size:13.5px;
+  }
+  .narr .txt .hot{color:var(--amber);font-weight:700}
+  .narr .txt .grn{color:var(--green);font-weight:700}
+  .narr .txt .org{color:var(--orange);font-weight:700}
+
+  /* ---------- 可视化区 ---------- */
+  .viz-title{
+    font-size:12.5px;color:#9db0d8;letter-spacing:.7px;margin:2px 0 8px;
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+  }
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:#8ea1c9;letter-spacing:0;font-weight:400}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid transparent}
+  .lg-pend{background:#1b2544;border-color:#3a4e79 !important}
+  .lg-done{background:var(--green-soft);border-color:#2ea36b !important}
+  .lg-write{background:#4a3a12;border-color:var(--amber) !important}
+  .lg-read{background:#3a2413;border-color:var(--orange) !important}
+  .lg-empty{background:#0e1526;border-color:#2a3757 !important;border-style:dashed !important}
+
+  .scroll-x{overflow-x:auto;padding-bottom:8px}
+  .grid{display:grid;gap:var(--gap);align-items:end}
+  .grid.ptr-row{margin-bottom:2px}
+
+  .ptr-cell{height:22px;display:flex;gap:3px;align-items:flex-end;justify-content:center}
+  .ptr{
+    font-family:Consolas,monospace;font-size:11.5px;font-weight:700;line-height:1;
+    padding:3px 6px;border-radius:6px;position:relative;
+  }
+  .ptr.i{background:var(--orange);color:#241000;box-shadow:0 0 12px rgba(255,140,66,.55)}
+  .ptr.j{background:var(--pink);color:#2b0014;box-shadow:0 0 12px rgba(255,111,165,.55)}
+
+  .cell{
+    width:var(--cell);height:var(--cell);border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:Consolas,"Courier New",monospace;font-size:19px;font-weight:600;
+    background:#1b2544;border:1px solid #3a4e79;color:#cddcff;
+    transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s;
+    position:relative;
+  }
+  .cell.done{background:var(--green-soft);border-color:#2ea36b;color:#8bf3bd}
+  .cell.empty{background:#0e1526;border:1px dashed #2a3757;color:#3c4a6d}
+  .cell.write{background:#4a3a12;border-color:var(--amber);color:#ffe6a6;transform:translateY(-5px);box-shadow:0 8px 20px rgba(255,200,87,.3)}
+  .cell.read{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,140,66,.35),0 0 18px rgba(255,140,66,.3)}
+  .cell.building{outline:1px solid rgba(255,200,87,.55);outline-offset:2px}
+  .cell.digit-orig{color:#ffd9a0}
+  .idx{
+    font-family:Consolas,monospace;font-size:11px;color:#6f80a6;text-align:center;margin-top:5px;
+  }
+  .str-cell{background:#152039;border-color:#33456e;color:#dbe6ff}
+  .str-cell.digit{background:#3a2413;border-color:var(--orange);color:#ffd2a8}
+  .str-cell.scan{background:#4a3a12;border-color:var(--amber);color:#ffe6a6;transform:translateY(-5px);box-shadow:0 8px 20px rgba(255,200,87,.28)}
+  .str-cell.done-scan{opacity:.55}
+
+  .empty-hint{
+    padding:16px;border:1px dashed #2a3757;border-radius:11px;color:#7a8bb0;font-size:13.5px;
+    background:#0d1428;text-align:center;
+  }
+  .result{
+    margin-top:14px;padding:12px 14px;border-radius:11px;background:#0f172c;border:1px solid #26375c;
+    display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;min-height:52px;
+  }
+  .result .lb{font-size:12.5px;color:#93a2c4}
+  .result .out{font-family:Consolas,monospace;font-size:19px;color:#8bf3bd;letter-spacing:1px;word-break:break-all}
+  .tag{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid}
+  .tag.ok{color:#8bf3bd;border-color:#2ea36b;background:#10382a}
+  .tag.bad{color:#ffb3b3;border-color:#a33b3b;background:#3a1414}
+  .tag.wait{color:#9db0d8;border-color:#35486f;background:#141d36}
+
+  /* ---------- 代码面板 ---------- */
+  .code-wrap{max-height:none}
+  pre.code{
+    margin:0;font-family:Consolas,"Courier New",monospace;font-size:12.6px;line-height:1.62;
+    overflow:auto;padding:4px 2px;
+  }
+  pre.code .ln{
+    display:flex;gap:10px;border-radius:6px;padding:1px 6px;border-left:3px solid transparent;
+    transition:background .18s,border-color .18s;
+  }
+  pre.code .no{color:#4e5f85;min-width:22px;text-align:right;user-select:none;flex:0 0 auto}
+  pre.code .src{white-space:pre;color:#b9c8e8}
+  pre.code .ln.hl{background:rgba(76,141,255,.13);border-left-color:#4c8dff}
+  pre.code .ln.hl .src{color:#e9f1ff}
+  pre.code .ln.cur{background:rgba(255,200,87,.14);border-left-color:var(--amber)}
+  pre.code .ln.cur .src{color:#ffeec2}
+  pre.code .ln .src .kw{color:#c792ea}
+  pre.code .ln .src .ty{color:#7fd1ff}
+  pre.code .ln .src .st{color:#a8e6a3}
+  pre.code .ln .src .cm{color:#5f7196;font-style:italic}
+  pre.code .ln .src .nm{color:#ffcb6b}
+
+  footer.notes{
+    margin-top:6px;color:#8fa1c8;font-size:13px;line-height:1.85;
+  }
+  footer.notes h3{color:#c3d3f5;font-size:14px;margin:14px 0 6px;letter-spacing:.6px}
+  footer.notes ul{margin:6px 0 0;padding-left:20px}
+  footer.notes code{font-family:Consolas,monospace;background:#101a30;border:1px solid #26375c;padding:1px 6px;border-radius:5px;color:#9fd0ff}
+  .hl-text{color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div>
+      <h1>KamaCoder 54 · 替换数字 —— 算法动画演示</h1>
+      <div class="sub">
+        把字符串中的每个数字字符替换成 <span class="kbd">"number"</span>，要求 <b>不开辟额外结果空间、一次遍历完成</b>。<br>
+        动画忠实还原你给出的 Java 代码：<span class="kbd">统计数字个数 → 扩容 char[] → 复制原串 → i/j 双指针从后往前回填</span>。
+      </div>
+    </div>
+    <div class="row">
+      <span class="kbd">空格</span> 播放/暂停 ·
+      <span class="kbd">← →</span> 单步 ·
+      <span class="kbd">R</span> 重置
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- ================= 左侧 ================= -->
+    <div class="left">
+
+      <div class="card">
+        <h2>输入与播放控制</h2>
+        <div class="row">
+          <input type="text" id="input" value="a1b2c" spellcheck="false" placeholder="输入字符串，例如 a1b2c">
+          <button class="primary" id="btnLoad">载入新字符串</button>
+        </div>
+        <div class="row chips" id="presets">
+          <span class="slabel">示例：</span>
+          <span class="chip" data-v="a1b2c">a1b2c</span>
+          <span class="chip" data-v="a1b2">a1b2</span>
+          <span class="chip" data-v="1a2b3">1a2b3</span>
+          <span class="chip" data-v="abc">abc（无数字）</span>
+          <span class="chip" data-v="123">123（全是数字）</span>
+          <span class="chip" data-v="x9y8z7">x9y8z7</span>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button id="btnFirst">⏮ 回到开头</button>
+          <button id="btnPrev">◀ 上一步</button>
+          <button class="primary" id="btnPlay">▶ 播放</button>
+          <button id="btnNext">下一步 ▶</button>
+          <button id="btnLast">跳到结尾 ⏭</button>
+          <button class="ghost" id="btnReset">⟲ 重置</button>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <label class="slabel">速度
+            <input type="range" id="speed" min="1" max="10" value="6" style="width:130px">
+            <span id="speedTxt" class="kbd">0.55s/步</span>
+          </label>
+          <span style="flex:1 1 100px"></span>
+          <span class="slabel" id="stepInfo">步骤 1 / 1</span>
+        </div>
+        <input type="range" class="scrub" id="scrub" min="0" max="0" value="0">
+      </div>
+
+      <div class="card">
+        <h2>变量监控（随动画实时变化）</h2>
+        <div class="vars">
+          <div class="vbox" id="v-sOldSize"><div class="k">sOldSize</div><div class="v">-</div></div>
+          <div class="vbox c" id="v-count"><div class="k">count</div><div class="v">-</div></div>
+          <div class="vbox" id="v-sNewSize"><div class="k">sNewSize</div><div class="v">-</div></div>
+          <div class="vbox i" id="v-i"><div class="k">i</div><div class="v">-</div></div>
+          <div class="vbox j" id="v-j"><div class="k">j</div><div class="v">-</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>当前步骤解说</h2>
+        <div class="narr">
+          <span class="badge" id="phaseBadge">准备</span>
+          <div class="txt" id="narrTxt">点击「播放」或「下一步」开始演示。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>内存可视化</h2>
+
+        <div class="viz-title">
+          ① 原始字符串 s（只读，用于统计数字）
+        </div>
+        <div class="scroll-x"><div class="grid" id="strRow"></div></div>
+
+        <div class="viz-title" style="margin-top:18px">
+          ② 新数组 newS（长度 = sOldSize + count×5）
+          <span class="legend">
+            <span><i class="lg-empty"></i>空白待填</span>
+            <span><i class="lg-pend"></i>待处理区（≤ j）</span>
+            <span><i class="lg-done"></i>已完成区（&gt; j）</span>
+            <span><i class="lg-write"></i>本步写入</span>
+            <span><i class="lg-read"></i>i 正在读取</span>
+          </span>
+        </div>
+        <div class="scroll-x" id="arrWrap">
+          <div class="grid" id="arrGrid"></div>
+          <div class="empty-hint" id="arrHint" style="display:none">newS 尚未创建 —— 先统计出 count，才能确定数组长度。</div>
+        </div>
+
+        <div class="result" id="resultBox">
+          <span class="lb">return new String(newS) ：</span>
+          <span class="out" id="resultOut">—</span>
+          <span id="resultTagWrap"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 右侧：源码 ================= -->
+    <aside class="right">
+      <div class="card code-wrap">
+        <h2>源码同步高亮</h2>
+        <pre class="code" id="codeBox"></pre>
+      </div>
+      <div class="card">
+        <h2>三个关键设计</h2>
+        <div style="font-size:13.5px;line-height:1.9;color:#c3d3f5">
+          <div>🔢 <b>先数后建</b>：必须知道 <code>count</code> 才能算出新长度 <code>sOldSize + count×5</code>。</div>
+          <div style="margin-top:8px">⬅️ <b>从后往前填</b>：每个数字要从 1 格变成 6 格，从右往左填，未被处理的字符永远不会被覆盖。</div>
+          <div style="margin-top:8px">🎯 <b>i、j 的含义</b>：<code>i</code> 指向原串尚未处理的字符，<code>j</code> 指向新数组当前要落笔的位置；<code>j</code> 右侧全部是已经确定的内容。</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="notes card">
+    <h2>算法原理速览</h2>
+    <div>
+      朴素做法是「边遍历边插入」，每遇到一个数字就把后面的字符整体后移 5 位，最坏 <b>O(n²)</b>。
+      这段代码换了个思路：<span class="hl-text">先扩容、再从后往前一次成型</span>。
+    </div>
+    <h3>执行流程</h3>
+    <ul>
+      <li><b>① 统计阶段</b>：遍历 s，用 <code>Character.isDigit</code> 数出一共有 count 个数字字符。</li>
+      <li><b>② 扩容阶段</b>：新建 <code>char[sOldSize + count * 5]</code>；每个数字由 1 个字符变为 <code>"number"</code> 6 个字符，正好多出 5 格。</li>
+      <li><b>③ 复制阶段</b>：<code>System.arraycopy</code> 把原串整体搬到新数组左侧，右侧 count×5 格先留空。</li>
+      <li><b>④ 回填阶段</b>：<code>i = sOldSize - 1</code>、<code>j = sNewSize - 1</code>，每次看 <code>newS[i]</code>：
+        <div>· 不是数字 → 直接搬到 <code>newS[j]</code>，i、j 同时左移 1 格；</div>
+        <div>· 是数字 → 从右往左倒着写 <code>r e b m u n</code>（即正着读的 <code>"number"</code>），然后 <code>j -= 5</code>，再随循环左移 1 格（共左移 6 格）。</div>
+      </li>
+      <li><b>⑤ 结束条件</b>：循环条件 <code>i &lt; j</code>。初始时两者间距恰好是 <code>count×5</code>，每处理一个数字间距缩小 5，所以间距归零时说明「i 左边已没有数字」，左侧非数字前缀本就无需移动，循环即可停止。</li>
+    </ul>
+    <h3>复杂度</h3>
+    <ul>
+      <li>时间：<b>O(n)</b>，只做了常数次线性扫描与搬运，没有任何「整体后移」。</li>
+      <li>空间：<b>O(n)</b>，结果数组 <code>newS</code> 是必需的输出空间（Java 中 String 不可变，必须新建 char[]）。</li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   1. 源码（与用户代码一致），用于右侧高亮
+   ============================================================ */
+const CODE = [
+  "import java.util.Scanner;",
+  "",
+  "public class Main{",
+  "",
+  "    public static String replaceNumber(String s){",
+  "        int count = 0;// 原来统计字符串s中的数字字符",
+  "        int sOldSize = s.length();",
+  "        for(int i = 0; i < sOldSize; i++){",
+  "            if(Character.isDigit(s.charAt(i))){",
+  "                count++;",
+  "            }",
+  "        }",
+  "        // 扩充字符串s的大小",
+  "        char[] newS = new char[sOldSize + count * 5];",
+  "        int sNewSize = newS.length;",
+  "        // 将旧字符串内容填入新数组中",
+  "        System.arraycopy(s.toCharArray(), 0, newS, 0, sOldSize);",
+  "        // 从后向前将空格填充为number",
+  "        for(int i = sOldSize - 1, j = sNewSize -1; i < j; j--, i--){",
+  "            if(!Character.isDigit(newS[i])){// 判断是否为数字",
+  "                newS[j] = newS[i];",
+  "            }",
+  "            else{",
+  "                newS[j] = 'r';",
+  "                newS[j-1] = 'e';",
+  "                newS[j-2] = 'b';",
+  "                newS[j-3] = 'm';",
+  "                newS[j-4] = 'u';",
+  "                newS[j-5] = 'n';",
+  "                j -= 5;               ",
+  "            }",
+  "        }",
+  "        return new String(newS);",
+  "    };"
+];
+
+/* 简易 Java 语法着色 */
+function esc(str){
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function highlightJava(line){
+  let t = esc(line);
+  // 注释
+  let cmt = "";
+  const ci = t.indexOf("//");
+  if(ci >= 0){ cmt = t.slice(ci); t = t.slice(0,ci); }
+  t = t.replace(/\b(public|class|static|void|int|char|new|return|for|if|else|import|String|Character)\b/g,
+        m => /^(public|class|static|void|int|char|new|return|for|if|else|import)$/.test(m)
+             ? '<span class="kw">'+m+'</span>'
+             : '<span class="ty">'+m+'</span>');
+  t = t.replace(/'([^']*)'/g, '<span class="st">\'$1\'</span>');
+  t = t.replace(/\b(\d+)\b/g, '<span class="nm">$1</span>');
+  if(cmt) t += '<span class="cm">'+cmt+'</span>';
+  return t;
+}
+
+/* ============================================================
+   2. 构建动画步骤（严格按 Java 代码语义模拟）
+   ============================================================ */
+const isDigitChar = c => c !== null && c !== undefined && c >= '0' && c <= '9';
+const range = (a,b) => { const r=[]; for(let k=a;k<=b;k++) r.push(k); return r; };
+
+const PHASE_NAME = {
+  init:      "初始化",
+  count:     "统计数字",
+  alloc:     "申请数组",
+  copy:      "复制原串",
+  initptr:   "指针初始化",
+  check:     "循环判断",
+  "move-check":"判断分支",
+  move:      "搬运字符",
+  "num-check":"判断分支",
+  "num-write":"倒写number",
+  "num-jump": "移动 j",
+  advance:   "变量更新",
+  "exit-check":"循环判断",
+  done:      "返回结果"
+};
+
+function buildSteps(input){
+  const s = input;
+  const sOldSize = s.length;
+  const steps = [];
+  let count = 0;
+  let newS = null;
+  let sNewSize = null;
+
+  const snap = () => newS ? newS.slice() : null;
+  function push(o){
+    steps.push(Object.assign({
+      phase:"init", i:-1, j:-1, count:count, newS:snap(),
+      sOldSize:sOldSize, sNewSize:sNewSize,
+      readIdx:-1, writeIdx:-1, building:null, scan:-1,
+      line:[], desc:""
+    }, o));
+  }
+
+  /* --- 方法入口 --- */
+  push({ phase:"init", line:[5,6,7],
+    desc:`进入 <code>replaceNumber("${esc(s)}")</code>：<code>count = 0</code>，<code>sOldSize = s.length() = ${sOldSize}</code>。` });
+
+  /* --- 第一阶段：统计数字个数 --- */
+  for(let k=0;k<sOldSize;k++){
+    const ch = s[k];
+    const d = isDigitChar(ch);
+    if(d) count++;
+    push({
+      phase:"count", i:k, count:count, scan:k,
+      line: d ? [8,9,10] : [8,9],
+      desc: d
+        ? `<code>Character.isDigit('${esc(ch)}')</code> 为 <span class="hot">true</span> → 执行 <code>count++</code>，此时 <code>count = ${count}</code>。`
+        : `<code>Character.isDigit('${esc(ch)}')</code> 为 false → 跳过 <code>count++</code>，<code>count</code> 仍为 <span class="grn">${count}</span>。`
+    });
+  }
+
+  /* --- 第二阶段：扩容 --- */
+  sNewSize = sOldSize + count*5;
+  newS = new Array(sNewSize).fill(null);
+  push({ phase:"alloc", line:[14,15],
+    desc:`统计完毕：共 <span class="hot">${count}</span> 个数字字符。申请 <code>new char[sOldSize + count*5]</code> = ${sOldSize} + ${count}×5 = <span class="hot">${sNewSize}</span> 个格子。` });
+
+  /* --- 第三阶段：复制原串 --- */
+  for(let k=0;k<sOldSize;k++) newS[k] = s[k];
+  push({ phase:"copy", line:[17], building:range(0, sOldSize-1),
+    desc:`<code>System.arraycopy</code> 把原串的 ${sOldSize} 个字符放到新数组最左侧，右边留下 <span class="hot">${count*5}</span> 个空格子用来"长个子"。` });
+
+  /* --- 第四阶段：双指针从后往前回填 --- */
+  let i = sOldSize - 1;
+  let j = sNewSize - 1;
+  push({ phase:"initptr", i:i, j:j, line:[19],
+    desc:`双指针就位：<code>i = sOldSize-1 = ${i}</code>（指向原串最后一个未处理字符），<code>j = sNewSize-1 = ${j}</code>（指向新数组最后一个格子）。` });
+
+  let guard = 0;
+  while(i < j && guard++ < 5000){
+    push({ phase:"check", i:i, j:j, line:[19],
+      desc:`判断循环条件 <code>i &lt; j</code>：${i} &lt; ${j} <span class="grn">成立</span>，进入循环体。此刻 <code>j</code> 右边的格子都已经确定好了。` });
+
+    const ch = newS[i];
+    const d = isDigitChar(ch);
+
+    if(!d){
+      push({ phase:"move-check", i:i, j:j, readIdx:i, line:[20],
+        desc:`读取 <code>newS[${i}] = '${esc(ch)}'</code>，<code>Character.isDigit</code> 为 false → 走 if 分支，把字符向右搬到 <code>j</code>。` });
+      newS[j] = newS[i];
+      push({ phase:"move", i:i, j:j, readIdx:i, writeIdx:j, line:[21],
+        desc:`<code>newS[${j}] = newS[${i}] = '${esc(ch)}'</code> —— 非数字字符原样搬到最右边（它不会变长）。` });
+    } else {
+      push({ phase:"num-check", i:i, j:j, readIdx:i, line:[20],
+        desc:`读取 <code>newS[${i}] = '${esc(ch)}'</code>，是 <span class="hot">数字</span> → 走 else 分支：它要占 6 个格子，所以<b>从右往左倒着写</b>，这样每写一位都不会碰到还没处理的内容。` });
+      const chars = ['r','e','b','m','u','n']; // 依次写到 j, j-1, ... j-5，正着读就是 number
+      for(let k=0;k<6;k++){
+        newS[j-k] = chars[k];
+        push({ phase:"num-write", i:i, j:j, writeIdx:j-k, building:[j-5, j], line:[24+k],
+          desc:`<code>newS[${j-k}] = '${chars[k]}'</code> —— 第 ${k+1}/6 个字符落笔，6 格拼起来读作 <span class="hot">"number"</span>。` });
+      }
+      j -= 5;
+      push({ phase:"num-jump", i:i, j:j, writeIdx:j, building:[j, j+5], line:[30],
+        desc:`数字已扩成 6 格，执行 <code>j -= 5</code> → <code>j = ${j}</code>（再加下面循环里的 <code>j--</code>，一共左移 6 格）。` });
+    }
+
+    j--; i--;
+    push({ phase:"advance", i:i, j:j, line:[19],
+      desc:`循环变量更新：<code>j-- → ${j}</code>，<code>i-- → ${i}</code>。此时 <code>j</code> 右侧区域已全部填好。` });
+  }
+
+  push({ phase:"exit-check", i:i, j:j, line:[19],
+    desc:`再判断 <code>i &lt; j</code>：${i} &lt; ${j} <span class="hot">不成立</span> → 循环结束。左边剩下的都是非数字字符，原位无需移动。` });
+
+  const out = newS.join('');
+  push({ phase:"done", i:i, j:j, line:[33], building:null, result:out,
+    desc:`执行 <code>return new String(newS)</code>，得到结果 <code>"${esc(out)}"</code>。全程只从左到右扫了几遍，没有做过任何整体后移 ✔` });
+
+  return steps;
+}
+
+/* ============================================================
+   3. 视图渲染
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const elInput = $("input"), elStrRow = $("strRow"), elArrGrid = $("arrGrid"),
+      elArrHint = $("arrHint"), elNarr = $("narrTxt"), elBadge = $("phaseBadge"),
+      elCode = $("codeBox"), elInfo = $("stepInfo"), elScrub = $("scrub"),
+      elOut = $("resultOut"), elTagWrap = $("resultTagWrap");
+
+let S = "";            // 当前字符串
+let steps = [];        // 步骤序列
+let cur = 0;           // 当前步骤下标
+let timer = null;      // 播放定时器
+let playing = false;
+let expected = "";     // 标准答案（用于校验）
+
+/* --- 代码面板初始化 --- */
+CODE.forEach((line,i)=>{
+  const div = document.createElement("div");
+  div.className = "ln";
+  div.dataset.no = i+1;
+  div.innerHTML = '<span class="no">'+(i+1)+'</span><span class="src">'+highlightJava(line)+'</span>';
+  elCode.appendChild(div);
+});
+
+/* --- 闪烁提示 --- */
+const prevVals = {};
+function setVar(key, id, val){
+  const box = $(id);
+  box.querySelector(".v").textContent = val;
+  if(prevVals[key] !== undefined && prevVals[key] !== val){
+    box.classList.remove("changed");
+    void box.offsetWidth;   // 强制重排以重放动画
+    box.classList.add("changed");
+  }
+  prevVals[key] = val;
+}
+
+/* --- 渲染 --- */
+function render(){
+  const st = steps[cur];
+
+  /* 变量面板 */
+  setVar("sOldSize","v-sOldSize", st.sOldSize);
+  setVar("count","v-count", st.count);
+  setVar("sNewSize","v-sNewSize", st.sNewSize === null ? "-" : st.sNewSize);
+  setVar("i","v-i", st.i < 0 ? "—" : st.i);
+  setVar("j","v-j", st.j < 0 ? "—" : st.j);
+
+  /* 解说 */
+  elBadge.textContent = PHASE_NAME[st.phase] || st.phase;
+  elNarr.innerHTML = st.desc;
+
+  /* 原始字符串行 */
+  elStrRow.innerHTML = "";
+  elStrRow.classList.add("grid");
+  elStrRow.style.gridTemplateColumns = `repeat(${Math.max(S.length,1)}, var(--cell))`;
+  const isScanning = st.phase === "count";
+  for(let k=0;k<S.length;k++){
+    const p = document.createElement("div");
+    p.className = "ptr-cell";
+    if(isScanning && k === st.i) p.innerHTML = '<span class="ptr i">i</span>';
+    elStrRow.appendChild(p);
+  }
+  for(let k=0;k<S.length;k++){
+    const c = document.createElement("div");
+    c.className = "cell str-cell" + (isDigitChar(S[k]) ? " digit" : "");
+    if(isScanning && k === st.i) c.classList.add("scan");
+    else if(isScanning && k < st.i) c.classList.add("done-scan");
+    c.textContent = S[k];
+    elStrRow.appendChild(c);
+  }
+  for(let k=0;k<S.length;k++){
+    const c = document.createElement("div");
+    c.className = "idx";
+    c.textContent = k;
+    elStrRow.appendChild(c);
+  }
+
+  /* 新数组行 */
+  const arr = st.newS;
+  if(!arr){
+    elArrGrid.style.display = "none";
+    elArrHint.style.display = "block";
+  } else {
+    elArrGrid.style.display = "grid";
+    elArrHint.style.display = "none";
+    const n = arr.length;
+    elArrGrid.style.gridTemplateColumns = `repeat(${n}, var(--cell))`;
+    elArrGrid.innerHTML = "";
+
+    const inFill = ["initptr","check","move-check","move","num-check","num-write","num-jump","advance","exit-check","done"].indexOf(st.phase) >= 0;
+    const settledFrom = (st.phase === "done") ? 0 : (inFill && st.j >= 0 ? st.j + 1 : Infinity);
+
+    /* 指针行 */
+    for(let k=0;k<n;k++){
+      const p = document.createElement("div");
+      p.className = "ptr-cell";
+      let html = "";
+      if(k === st.i && st.i >= 0 && inFill) html += '<span class="ptr i">i</span>';
+      if(k === st.j && st.j >= 0 && inFill) html += '<span class="ptr j">j</span>';
+      p.innerHTML = html;
+      elArrGrid.appendChild(p);
+    }
+    /* 格子行 */
+    const build = st.building;
+    const buildSet = new Set();
+    if(Array.isArray(build)){ for(let k=build[0];k<=build[1];k++) buildSet.add(k); }
+    for(let k=0;k<n;k++){
+      const c = document.createElement("div");
+      c.className = "cell";
+      const v = arr[k];
+      if(v === null || v === undefined){ c.classList.add("empty"); c.textContent = "·"; }
+      else {
+        c.textContent = v;
+        if(k > settledFrom - 1 && settledFrom !== Infinity) c.classList.add("done");
+        else if(k < S.length && isDigitChar(v) && k <= st.j) c.textContent = v;  // 尚未处理的原始数字
+      }
+      if(k <= st.j && buildSet.has(k) && st.phase !== "done") c.classList.add("building");
+      if(k === st.readIdx) c.classList.add("read");
+      if(k === st.writeIdx) c.classList.add("write");
+      elArrGrid.appendChild(c);
+    }
+    /* 下标行 */
+    for(let k=0;k<n;k++){
+      const c = document.createElement("div");
+      c.className = "idx";
+      c.textContent = k;
+      elArrGrid.appendChild(c);
+    }
+  }
+
+  /* 结果框 */
+  if(st.phase === "done"){
+    elOut.textContent = st.result;
+    const ok = st.result === expected;
+    elTagWrap.innerHTML = ok
+      ? '<span class="tag ok">✓ 与标准结果 s.replace(数字 → number) 一致</span>'
+      : '<span class="tag bad">✗ 与标准结果不一致，请检查</span>';
+  } else {
+    elOut.textContent = "—";
+    elTagWrap.innerHTML = '<span class="tag wait">尚未返回</span>';
+  }
+
+  /* 代码高亮 */
+  const hlSet = new Set(st.line);
+  const firstLine = st.line.length ? st.line[0] : -1;
+  [...elCode.children].forEach((ln,idx)=>{
+    const no = idx+1;
+    ln.classList.toggle("hl", hlSet.has(no));
+    ln.classList.toggle("cur", no === firstLine);
+  });
+
+  /* 进度 */
+  elInfo.textContent = `步骤 ${cur+1} / ${steps.length}`;
+  elScrub.value = cur;
+  $("btnPrev").disabled = $("btnFirst").disabled = (cur === 0);
+  $("btnNext").disabled = $("btnLast").disabled = (cur === steps.length-1);
+}
+
+/* ============================================================
+   4. 交互
+   ============================================================ */
+function load(str){
+  pause();
+  S = str;
+  expected = S.replace(/[0-9]/g, "number");
+  steps = buildSteps(S);
+  cur = 0;
+  for(const k in prevVals) delete prevVals[k];
+  elScrub.max = steps.length - 1;
+  elScrub.value = 0;
+  render();
+}
+function goto(n){ cur = Math.max(0, Math.min(steps.length-1, n)); render(); }
+function next(){ if(cur < steps.length-1) goto(cur+1); else pause(); }
+function play(){
+  if(playing) return;
+  if(cur === steps.length-1) goto(0);
+  playing = true;
+  $("btnPlay").innerHTML = "⏸ 暂停";
+  const delay = delayFromSpeed();
+  timer = setInterval(()=>{
+    if(cur >= steps.length-1){ pause(); return; }
+    next();
+  }, delay);
+}
+function pause(){
+  playing = false;
+  if(timer) clearInterval(timer);
+  timer = null;
+  $("btnPlay").innerHTML = "▶ 播放";
+}
+function delayFromSpeed(){
+  const v = +$("speed").value;           // 1..10
+  return Math.round(1500 - (v-1) * (1500-130)/9);  // 1500ms → 130ms
+}
+
+/* 按钮绑定 */
+$("btnLoad").onclick = ()=>{ const v = elInput.value.trim().split(/\s+/)[0] || "a1b2c"; elInput.value = v; load(v); };
+elInput.addEventListener("keydown", e=>{ if(e.key === "Enter") $("btnLoad").click(); });
+$("presets").addEventListener("click", e=>{
+  const chip = e.target.closest(".chip"); if(!chip) return;
+  elInput.value = chip.dataset.v; load(chip.dataset.v);
+});
+$("btnPlay").onclick = ()=>{ playing ? pause() : play(); };
+$("btnNext").onclick = ()=>{ pause(); next(); };
+$("btnPrev").onclick = ()=>{ pause(); goto(cur-1); };
+$("btnFirst").onclick = ()=>{ pause(); goto(0); };
+$("btnLast").onclick = ()=>{ pause(); goto(steps.length-1); };
+$("btnReset").onclick = ()=>{ pause(); cur = 0; for(const k in prevVals) delete prevVals[k]; render(); };
+elScrub.addEventListener("input", ()=>{ pause(); goto(+elScrub.value); });
+$("speed").addEventListener("input", ()=>{
+  $("speedTxt").textContent = (delayFromSpeed()/1000).toFixed(2) + "s/步";
+  if(playing){ pause(); play(); }
+});
+document.addEventListener("keydown", e=>{
+  if(e.target === elInput) return;
+  if(e.code === "Space"){ e.preventDefault(); playing ? pause() : play(); }
+  else if(e.key === "ArrowRight"){ pause(); next(); }
+  else if(e.key === "ArrowLeft"){ pause(); goto(cur-1); }
+  else if(e.key === "r" || e.key === "R"){ pause(); cur = 0; render(); }
+});
+
+/* 启动 */
+$("speedTxt").textContent = (delayFromSpeed()/1000).toFixed(2) + "s/步";
+load(elInput.value);
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 /* 本文件由 tools/build.py 自动生成，重新运行脚本会覆盖。
    小改文案可以直接手改，但下次 build 会被 meta.json 里的值覆盖。 */
 window.__PROBLEMS__ = {
-  "generatedAt": "2026-10-09 16:12:15",
+  "generatedAt": "2026-10-10 14:21:35",
   "site": {
     "title": "代码随想录刷题同步算法原理可视化site",
     "subtitle": "",
@@ -195,6 +195,34 @@ window.__PROBLEMS__ = {
       "fingerprint": "d9b6dce069",
       "updated": "2026-10-09 15:37",
       "source": "leetcode_151_反转字符串中的单词.html"
+    },
+    {
+      "id": "kamacoder-54-replace-number",
+      "order": 8,
+      "no": "54",
+      "platform": "卡玛网",
+      "title": "替换数字",
+      "subtitle": "先扩容 · 从后往前回填",
+      "categories": [
+        "字符串",
+        "双指针法"
+      ],
+      "tags": [
+        "双指针",
+        "从后往前",
+        "先扩容再回填"
+      ],
+      "level": "中等",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "把字符串里的每个数字字符换成 \"number\"：先数出 count，再按 sOldSize + count×5 一次扩容，最后让 i、j 两个指针从后往前错位回填。逐帧看到数字如何被倒着写成 r e b m u n，以及循环条件 i < j 为什么会在间距归零时收工。",
+      "complexity": "时间 O(n) · 空间 O(n)",
+      "category": "字符串",
+      "file": "problems/kamacoder-54-replace-number.html",
+      "bytes": 34555,
+      "fingerprint": "2027c2c2cc",
+      "updated": "2026-10-10 14:10",
+      "source": "kamacoder_54_替换数字.html"
     }
   ]
 };

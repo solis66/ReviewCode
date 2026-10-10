@@ -123,6 +123,22 @@
       "theme": "dark",
       "summary": "禁用 split / trim / reverse，只用 StringBuilder 和几个下标指针：先去首尾与中间多余空格，再整体反转，最后逐词反转回来。每一步都摆出 start、end、c、sb 的真实取值，看清「两次反转 = 位置颠倒而字母复原」这个不变量。",
       "complexity": "时间 O(n) · 空间 O(n)"
+    },
+
+    "kamacoder_54_替换数字.html": {
+      "id": "kamacoder-54-replace-number",
+      "order": 8,
+      "no": "54",
+      "platform": "卡玛网",
+      "title": "替换数字",
+      "subtitle": "先扩容 · 从后往前回填",
+      "categories": ["字符串", "双指针法"],
+      "tags": ["双指针", "从后往前", "先扩容再回填"],
+      "level": "中等",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "把字符串里的每个数字字符换成 \"number\"：先数出 count，再按 sOldSize + count×5 一次扩容，最后让 i、j 两个指针从后往前错位回填。逐帧看到数字如何被倒着写成 r e b m u n，以及循环条件 i < j 为什么会在间距归零时收工。",
+      "complexity": "时间 O(n) · 空间 O(n)"
     }
   }
 }
