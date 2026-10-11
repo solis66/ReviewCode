@@ -1,7 +1,7 @@
 /* 本文件由 tools/build.py 自动生成，重新运行脚本会覆盖。
    小改文案可以直接手改，但下次 build 会被 meta.json 里的值覆盖。 */
 window.__PROBLEMS__ = {
-  "generatedAt": "2026-10-10 14:21:35",
+  "generatedAt": "2026-10-11 14:47:48",
   "site": {
     "title": "代码随想录刷题同步算法原理可视化site",
     "subtitle": "",
@@ -223,6 +223,33 @@ window.__PROBLEMS__ = {
       "fingerprint": "2027c2c2cc",
       "updated": "2026-10-10 14:10",
       "source": "kamacoder_54_替换数字.html"
+    },
+    {
+      "id": "leetcode-206-reverse-linked-list",
+      "order": 9,
+      "no": "206",
+      "platform": "LeetCode",
+      "title": "反转链表",
+      "subtitle": "三指针接力 · 先读再写后搬",
+      "categories": [
+        "链表",
+        "双指针法"
+      ],
+      "tags": [
+        "链表",
+        "双指针"
+      ],
+      "level": "简单",
+      "language": "Java",
+      "theme": "dark",
+      "summary": "链表只有一个 next 方向，所以反转的关键不是改值而是改指向。逐帧观察 temp = cur.next 先存档、cur.next = prev 再拆桥、prev / cur 最后推进这三步为什么顺序被锁死；带上单节点与空链表两个边界用例，看清 prev 从 null 出发时收尾是怎么发生的。",
+      "complexity": "时间 O(n) · 空间 O(1)",
+      "category": "链表",
+      "file": "problems/leetcode-206-reverse-linked-list.html",
+      "bytes": 45222,
+      "fingerprint": "0e92f17a0c",
+      "updated": "2026-10-11 14:42",
+      "source": "leetcode_206_反转链表.html"
     }
   ]
 };

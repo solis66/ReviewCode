@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>206. 反转链表 · 三个指针的接力可视化</title>
+<style>
+  :root{
+    --bg:#07111f; --panel:#0e1b2e; --panel2:#13233a; --line:#27425f; --text:#e9f2ff; --muted:#9fb3ca;
+    --blue:#55b7ff; --orange:#ffb45b; --green:#6fe3a2; --pink:#ff7eac; --red:#ff7b7b; --violet:#b18cff;
+    --shadow:0 16px 42px rgba(0,0,0,.28);
+    --cw:62px; --gap:26px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;color:var(--text);
+    background:radial-gradient(circle at 12% 0%,#15304d 0,#07111f 45%,#050b14 100%);
+    font:15px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1340px;margin:0 auto;padding:30px 22px 46px;}
+  h1{margin:0;font-size:clamp(24px,4vw,38px);letter-spacing:.02em;}
+  .sub{margin:8px 0 20px;color:var(--muted);}
+  code{background:#0b1a2b;border:1px solid #23405e;border-radius:5px;padding:1px 6px;font:12.5px ui-monospace,monospace;color:#bcd6f2;}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end;padding:16px;background:rgba(14,27,46,.88);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);}
+  label.tin{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:6px;}
+  input,select{width:min(320px,72vw);padding:10px 12px;border-radius:10px;border:1px solid #3a5a79;background:#091525;color:var(--text);font:inherit;outline:none;}
+  select{width:auto;}
+  input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(85,183,255,.18);}
+  button{border:1px solid #3a5a79;background:#162a43;color:var(--text);border-radius:10px;padding:10px 14px;font:inherit;cursor:pointer;transition:.16s ease;}
+  button:hover:not(:disabled){transform:translateY(-1px);border-color:var(--blue);background:#1b3858;}
+  button.primary{background:linear-gradient(135deg,#218ed0,#3564d5);border-color:#66c4ff;}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+  .layout{margin-top:18px;display:grid;grid-template-columns:405px minmax(0,1fr);gap:18px;}
+  .layout > *{min-width:0;}
+  .panel{background:rgba(14,27,46,.9);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0;}
+  .panel h2{margin:0 0 14px;font-size:17px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tag{font:11px ui-monospace,monospace;color:var(--muted);border:1px solid #2a4867;border-radius:99px;padding:2px 9px;}
+
+  /* ---------- 代码区 ---------- */
+  .code{margin:0;padding:12px 0;border-radius:12px;overflow:auto;background:#07111d;border:1px solid #1e3854;
+    color:#c9d8eb;font:12.5px/1.68 ui-monospace,SFMono-Regular,Consolas,monospace;}
+  .line{display:block;padding:0 14px 0 0;border-left:3px solid transparent;white-space:pre;}
+  .line .ln{display:inline-block;width:30px;text-align:right;margin-right:10px;color:#4d6a8a;user-select:none;}
+  .line.active{background:rgba(85,183,255,.15);border-left-color:var(--blue);color:#fff;}
+  .line.done{color:#9db4cc;}
+  .kw{color:#c792ea;} .fn{color:#82aaff;} .num{color:#f78c6c;} .comment{color:#6e879e;}
+
+  /* ---------- 舞台 ---------- */
+  .stage{padding:16px 16px 4px;border-radius:14px;background:#091525;border:1px solid #24415e;overflow-x:auto;}
+  .nodes{position:relative;display:flex;gap:var(--gap);min-width:max-content;padding-top:8px;}
+  .node{width:var(--cw);flex:0 0 var(--cw);display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .cap{font:11px ui-monospace,monospace;color:var(--muted);white-space:nowrap;}
+  /* 注意：高亮颜色不加 transition。逐步播放时状态必须“立刻”反映到画面上，
+     否则快速连点/自动播放会让高亮滞后于当前步骤，看着像画错了。 */
+  .box{position:relative;width:var(--cw);height:62px;border-radius:12px;border:1px solid #3f6285;background:#132943;
+    display:flex;align-items:center;justify-content:center;gap:0;font:600 21px ui-monospace,monospace;color:#dbeaff;}
+  .box .v{padding-left:2px;}
+  .box .nx{position:absolute;right:7px;top:50%;transform:translateY(-50%);font:9px ui-monospace,monospace;color:#5d7fa3;}
+  /* 节点高亮的颜色由 JS 直接算好写进内联样式（见 paintNode），
+     这里只保留“本步主角跳一下”的动画与 null 盒子的外观 */
+  .node.flash .box{animation:pop .45s cubic-bezier(.2,1.4,.4,1);}
+  @keyframes pop{0%{transform:translateY(-8px) scale(1.1);}55%{transform:translateY(-2px) scale(1.03);}100%{transform:none;}}
+  .box.null{background:transparent;border-style:dashed;border-color:#3a5a79;color:#63799a;
+    font:600 12px ui-monospace,monospace;flex-direction:column;line-height:1.35;}
+  .box.null small{font-size:9.5px;color:#4e6a8a;}
+  .node.flash .box.null{border-color:var(--green);}
+
+  .lanes{position:relative;margin-top:6px;min-width:max-content;height:170px;}
+  .labels{position:absolute;inset:0;pointer-events:none;z-index:5;}
+  .lbl{position:absolute;font:11px ui-monospace,monospace;white-space:nowrap;transform:translateX(-50%);
+    background:#0b1a2b;border:1px solid #23405e;border-radius:99px;padding:1px 8px;pointer-events:none;}
+  .lbl.cur{color:#ffcd8f;border-color:rgba(255,180,91,.6);}
+  .lbl.prev{color:#b6f5d3;border-color:rgba(111,227,162,.6);}
+  .lbl.temp{color:#ffb3cd;border-color:rgba(255,126,172,.6);}
+  .lbl.dead{color:#ff9d9d;border-color:rgba(255,123,123,.5);}
+  #paths{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:3;}
+  #paths path{fill:none;}
+  #paths path.live{stroke-width:2.6;}
+  #paths path.dead{opacity:.85;}
+  .break{display:none;}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:12px;}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;}
+  .dgreen{background:var(--green);} .dorange{background:var(--orange);} .dpink{background:var(--pink);}
+  .dred{background:var(--red);} .dblue{background:var(--blue);}
+
+  /* ---------- 三根指针的格子带 ---------- */
+  .refstrip{margin-top:14px;display:grid;grid-template-columns:74px minmax(0,1fr);gap:8px 10px;align-items:center;}
+  .rowname{font:12px ui-monospace,monospace;color:var(--muted);text-align:right;padding-right:2px;}
+  .cells{position:relative;display:flex;gap:var(--gap);min-width:max-content;}
+  .cells.refcellrow{padding-top:6px;}
+  .rcell{width:var(--cw);flex:0 0 var(--cw);display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .cell{width:var(--cw);height:24px;border-radius:7px;background:rgba(19,41,67,.55);border:1px solid #1f3a58;
+    display:flex;align-items:center;justify-content:center;color:#7f9ab7;font:12px ui-monospace,monospace;transition:.2s;}
+  .cell.c-col{color:#ffcd8f;border-color:rgba(255,180,91,.45);background:rgba(255,180,91,.10);}
+  .cell.p-col{color:#b6f5d3;border-color:rgba(111,227,162,.45);background:rgba(111,227,162,.10);}
+  .cell.t-col{color:#ffb3cd;border-color:rgba(255,126,172,.45);background:rgba(255,126,172,.10);}
+  .cell.c-col.changed{animation:flash .7s ease;box-shadow:0 0 0 2px rgba(255,180,91,.7);}
+  .cell.p-col.changed{animation:flash .7s ease;box-shadow:0 0 0 2px rgba(111,227,162,.7);}
+  .cell.t-col.changed{animation:flash .7s ease;box-shadow:0 0 0 2px rgba(255,126,172,.7);}
+  @keyframes flash{0%{filter:brightness(1.9);}100%{filter:none;}}
+
+  /* ---------- 变量面板 ---------- */
+  .vars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+  .var{padding:11px 12px;border-radius:12px;background:var(--panel2);border:1px solid #2a4867;transition:.25s;}
+  .var.hot{border-color:var(--blue);box-shadow:0 0 0 3px rgba(85,183,255,.2);}
+  .var .name{color:var(--muted);font:11.5px ui-monospace,monospace;}
+  .var .value{margin-top:3px;font:600 20px ui-monospace,monospace;}
+  .v-cur{color:#ffcd8f;} .v-prev{color:#b6f5d3;} .v-temp{color:#ffb3cd;}
+  .var .delta{font:11px ui-monospace,monospace;color:var(--muted);margin-top:2px;}
+  .v-op{color:#e9f2ff;font-size:14px!important;line-height:1.5;}
+
+  .desc{margin-top:16px;padding:14px;border-radius:12px;background:#0b1a2b;border:1px solid #23405e;
+    border-left:4px solid var(--blue);font-size:14px;line-height:1.75;color:#cfe2f5;min-height:104px;}
+  .desc b{color:#fff;}
+  .desc .warn{color:#ffcd8f;}
+  .progress{height:7px;margin:16px 0 7px;border-radius:99px;background:#20354e;overflow:hidden;}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--green));transition:.25s;}
+
+  /* ---------- 表格 / 说明 ---------- */
+  .tablewrap{margin-top:12px;overflow:auto;max-height:300px;border-radius:12px;border:1px solid #23405e;}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #1d3350;white-space:nowrap;}
+  th{position:sticky;top:0;background:#0c1b2d;color:var(--muted);font-weight:600;font-size:12px;z-index:1;}
+  tbody tr.cur{background:rgba(85,183,255,.14);}
+  tbody tr.cur td{color:#fff;}
+  td.op{color:#cfe2f5;} td.cv{color:#ffcd8f;} td.pv{color:#b6f5d3;} td.tv{color:#ffb3cd;}
+  td.same{color:#6e879e;} td.chg{color:#fff;background:rgba(85,183,255,.14);border-radius:4px;}
+  .mono{font-family:ui-monospace,monospace;}
+
+  .insight{margin:0;padding-left:18px;color:#cfe2f5;font-size:13.5px;line-height:1.85;}
+  .insight li::marker{color:var(--blue);}
+  .insight b{color:#fff;background:rgba(85,183,255,.14);border-radius:4px;padding:0 4px;}
+  .result{margin-top:14px;padding:14px;border-radius:12px;background:rgba(111,227,162,.1);border:1px solid var(--green);font-size:14px;color:#b6f5d3;}
+  .result b{color:#fff;}
+  .cmp{display:grid;gap:12px;margin-top:12px;}
+  .cmpbox{padding:13px 14px;border-radius:12px;background:#0b1a2b;border:1px solid #23405e;font-size:13.5px;line-height:1.75;color:#cfe2f5;}
+  .cmpbox h4{margin:0 0 6px;font-size:13.5px;font:600 13.5px ui-monospace,monospace;}
+  .cmpbox.a{border-left:4px solid var(--pink);} .cmpbox.a h4{color:var(--pink);}
+  .cmpbox.b{border-left:4px solid var(--green);} .cmpbox.b h4{color:var(--green);}
+  .cmpbox b{color:#fff;}
+
+  @media (max-width:1120px){ .layout{grid-template-columns:1fr;} }
+  @media (max-width:560px){
+    .wrap{padding:20px 12px 34px;} .toolbar{align-items:stretch;} input,.toolbar label.tin{width:100%;}
+    button{flex:1;} .vars{grid-template-columns:1fr;} :root{--cw:50px;--gap:20px;} .box{height:52px;font-size:18px;}
+    .refstrip{grid-template-columns:60px minmax(0,1fr);}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>206. 反转链表 · 三根指针的接力</h1>
+  <p class="sub">真正被改写的只有一件事：<b>每个节点的 next 指向</b>。看清 <code>temp</code> 存档、<code>cur.next</code> 拆桥、<code>prev</code>/<code>cur</code> 推进这四步的顺序为什么不能换。</p>
+
+  <section class="toolbar" aria-label="控制区">
+    <label class="tin">链表（逗号分隔，1~8 个）<input id="input" value="1,2,3,4,5" aria-label="输入链表" /></label>
+    <button id="preset1" style="flex:0 0 auto">示例 1→2→3→4→5</button>
+    <button id="preset2" style="flex:0 0 auto">单节点 7</button>
+    <button id="preset3" style="flex:0 0 auto">空链表</button>
+    <button id="reset">重置</button>
+    <button id="prev">◀ 上一步</button>
+    <button id="step" class="primary">下一步 ▶</button>
+    <button id="play">▶ 自动播放</button>
+    <label class="tin">速度<select id="speed">
+      <option value="1600">慢</option><option value="1000" selected>中</option><option value="520">快</option>
+    </select></label>
+    <span class="tag" id="stepTag">第 0 步</span>
+  </section>
+
+  <div class="layout">
+    <!-- ============ 左列 ============ -->
+    <div>
+      <section class="panel">
+        <h2>Java 代码 · 执行位置 <span class="tag">双指针 + 存档变量</span></h2>
+        <pre class="code" id="code" aria-label="Java 源码"></pre>
+      </section>
+
+      <section class="panel" style="margin-top:18px">
+        <h2>回答你的问题：这两行到底差在哪</h2>
+        <div class="cmp">
+          <div class="cmpbox a">
+            <h4>temp = cur.next;</h4>
+            右边带 <b>“.”</b> —— 这是<b>顺着指针走一格</b>，把“下一个节点是谁”这份信息抄进 <code>temp</code>。它是<b>读取</b>，不改结构，唯一目的是<b>存档</b>：因为下一步马上就要把 <code>cur.next</code> 覆盖掉，不先存就再也找不到后面了。
+          </div>
+          <div class="cmpbox b">
+            <h4>prev = cur;</h4>
+            右边<b>没有“.”</b> —— 这是<b>纯粹的变量复制</b>，只让 <code>prev</code> 也指向 <code>cur</code> 所在的那个节点。它<b>完全不碰节点内部</b>，链表结构一点没变，作用是<b>让游标前进</b>。
+          </div>
+          <div class="cmpbox">
+            <h4>一句话记住</h4>
+            <b>带“.”的赋值改结构（链表），不带“.”的赋值改游标（遍历进度）。</b><br>
+            所以整个循环里，真正改变链表的<b>只有 <code>cur.next = prev;</code> 这一行</b>；另外三行都只是搬指针、做记录。
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:18px">
+        <h2>核心不变量</h2>
+        <ul class="insight">
+          <li><b>prev</b>：已经完成反转的那段链表的<b>头</b>，同时也是 <code>cur</code> 将要指回去的节点。</li>
+          <li><b>cur</b>：还没处理的那个节点（本轮主角）。</li>
+          <li><b>temp</b>：只是为了救下 <code>cur.next</code> 的<b>临时存档</b>，生命周期只有一轮。</li>
+          <li>顺序被锁死：<b>先读、再写、后搬</b>。先搬则新旧信息全乱，先写则后路丢失。</li>
+          <li>每个节点只被处理一次 → 时间 <b>O(n)</b>；只开 3 个变量 → 空间 <b>O(1)</b>。</li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- ============ 右列 ============ -->
+    <div>
+      <section class="panel">
+        <h2>节点与指针 <span class="tag">箭头 = next 指向</span> <span class="tag" id="stageTag">共 0 个节点</span></h2>
+        <div class="stage">
+          <div class="nodes" id="nodes"></div>
+          <div class="lanes" id="lanes">
+            <svg id="paths" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#6fe3a2"></path>
+                </marker>
+                <marker id="ahd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff7b7b"></path>
+                </marker>
+              </defs>
+              <g id="pathGroup"></g>
+            </svg>
+            <div id="labels" class="labels" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot dgreen"></i>实线绿箭头 = 已反转的 next</span>
+          <span><i class="dot dred"></i>红色虚线 = 被拆掉的旧箭头</span>
+          <span><i class="dot dpink"></i>temp（存档）</span>
+          <span><i class="dot dorange"></i>cur（当前）</span>
+          <span><i class="dot dgreen"></i>prev（已反转段的头）</span>
+        </div>
+
+        <div class="refstrip" id="refstrip"></div>
+        <div class="legend" style="margin-top:8px"><span>上面三行分别是三根指针的<b>落点监控</b>；<span style="color:#7f9ab7">空块</span> = 指到了 null。</span></div>
+
+        <div class="vars">
+          <div class="var" id="boxCur"><div class="name">cur</div><div id="vCur" class="value v-cur">—</div><div id="dCur" class="delta">&nbsp;</div></div>
+          <div class="var" id="boxPrev"><div class="name">prev</div><div id="vPrev" class="value v-prev">—</div><div id="dPrev" class="delta">&nbsp;</div></div>
+          <div class="var" id="boxTemp"><div class="name">temp</div><div id="vTemp" class="value v-temp">—</div><div id="dTemp" class="delta">&nbsp;</div></div>
+          <div class="var" style="grid-column:1 / -1" id="boxOp"><div class="name">当前数据结构（反转过程中会裂成两截）</div><div id="vList" class="value v-op mono">—</div><div id="dList" class="delta">&nbsp;</div></div>
+        </div>
+
+        <div class="desc" id="desc">点击「下一步 ▶」开始逐步执行。</div>
+
+        <div class="progress" aria-label="执行进度"><div id="bar" class="bar"></div></div>
+        <div class="legend" style="margin-top:0"><span id="progressText">第 0 / 0 步</span></div>
+      </section>
+
+      <section class="panel" style="margin-top:18px">
+        <h2>变量变化记录表 <span class="tag">每执行一行 = 一行</span></h2>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>步</th><th>行</th><th>执行语句</th><th>cur</th><th>prev</th><th>temp</th><th>链表 next 变化</th></tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="result" id="result">反转完成后，返回值是 <b>prev</b>（原来的尾节点），因为它停在新链表的头部。</div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ==================================================================
+   206. 反转链表 —— 可视化
+   思路：把代码按“每次执行一行”切成状态快照，
+        每个快照带一份 next 指向数组 + 三根指针的落点 + 当前高亮行。
+   ================================================================== */
+const $ = id => document.getElementById(id);
+const codeEl = $('code'), nodesEl = $('nodes'), lanesEl = $('lanes'), refstripEl = $('refstrip');
+const laneSvg = $('paths'), pathGroup = $('pathGroup'), labelsEl = $('labels');
+
+const NL = 999;               // “null”这个虚拟节点的下标
+const LANE_H = 190;           // 箭头跑道的最小高度（实际按内容自动加深）
+
+/* ---------- 源码 ---------- */
+const CODE = [
+  'class Solution {',
+  '    public ListNode reverseList(ListNode head) {',
+  '        ListNode prev = null;',
+  '        ListNode cur = head;',
+  '        ListNode temp = null;',
+  '',
+  '        while (cur != null) {',
+  '            temp = cur.next;   // ① 先存档：记住“后面还有谁”',
+  '            cur.next = prev;   // ② 再改向：本节点反过来指向前一个',
+  '            prev = cur;        // ③ 搬游标：prev 前进到当前节点',
+  '            cur = temp;        // ④ 搬游标：cur 前进到刚存下的节点',
+  '        }',
+  '',
+  '        return prev;',
+  '    }',
+  '}'
+];
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* 单次扫描高亮，避免已插入的标签被二次匹配 */
+function hl(s){
+  const re = /(\/\/[^\n]*)|\b(class|public|int|while|return|new|null)\b|\b(reverseList|Solution|ListNode|head|prev|cur|temp|next)\b/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(s)) !== null){
+    out += esc(s.slice(last, m.index));
+    const t = esc(m[0]);
+    if (m[1] !== undefined)      out += '<span class="comment">' + t + '</span>';
+    else if (m[2] !== undefined) out += '<span class="kw">' + t + '</span>';
+    else                         out += '<span class="fn">' + t + '</span>';
+    last = m.index + m[0].length;
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out + esc(s.slice(last));
+}
+codeEl.innerHTML = CODE.map((l,i)=>`<span class="line" data-line="${i+1}"><span class="ln">${i+1}</span>${hl(l)||'&nbsp;'}</span>`).join('');
+
+/* ---------- 状态生成 ---------- */
+/* 从 head 顺着 next 走，返回经过的节点下标。
+   注意：NL 是“全链共用”的虚拟 null 节点，它自己也有 next，所以必须在遇到它时停下，
+        否则会顺着 NL 继续走到别的节点上。 */
+function listChain(next, head){
+  const out = [], seen = new Set();
+  let p = head;
+  while (p !== -1 && p !== null && p !== undefined && p !== NL && !seen.has(p)){
+    seen.add(p); out.push(p); p = next[p];
+  }
+  return out;
+}
+
+function buildStates(vals){
+  const n = vals.length;
+
+  if (n === 0){
+    return [{ kind:'end', next:[], cur:NL, prev:NL, temp:-1, orig:new Map(), head:-1, changed:null,
+      lines:[2,3,11,14], result:true, round:0,
+      act:'链表为空，head 就是 null',
+      desc:'空链表的边界情况：初始化后 <b>cur = head = null</b>，<code>while (cur != null)</code> 一次都不会进入，直接执行 <b>return prev</b>，也就是 <b>null</b>。代码天然正确，不需要额外判断。' }];
+  }
+
+  const orig = new Map();                 // 原始 next 指向（用于画红色虚线旧箭头）
+  for (let i = 0; i < n; i++) orig.set(i, i === n-1 ? NL : i+1);
+
+  let next  = new Array(n).fill(-1);
+  for (let i = 0; i < n; i++) next[i] = (i === n-1 ? NL : i+1);
+  let prev = NL, cur = 0, temp = -1;
+  const st = [];
+
+  const snap = o => st.push(Object.assign({ next: next.slice(), cur, prev, temp, orig, head:0, round:0, changed:null }, o));
+
+  snap({ kind:'init', lines:[3,4,5], act:'初始化：prev = null，cur = head，temp 还没用上',
+    desc:`初始化三件事：<b>prev = null</b>（已反转段是空的）、<b>cur = head</b>（指向 ${vals[0]}，本轮主角）、<b>temp = null</b>（先占个位，真正的存档发生在 ①）。此时没有任何 next 被改动，链表还是原样 <b>${vals.join(' → ')}</b>。` });
+
+  for (let c = 0; c < n; c++){
+    const round = c + 1;
+    const vCur  = vals[c];
+    const oldNext = (c === n-1 ? NL : c+1);           // ① 要存档的节点
+    const vOld    = oldNext === NL ? 'null' : vals[oldNext];
+    const vPrev   = prev === NL ? 'null' : vals[prev];
+
+    /* -------- ① temp = cur.next -------- */
+    temp = oldNext;
+    snap({ kind:'save', lines:[7], round, changed:'temp', act:`temp 存档 = ${vOld}`,
+      desc:`【① 先存档】<code>temp = cur.next;</code><br>右边带 <b>“.”</b>，是<b>读取</b> <code>cur</code> 节点的 next 字段，把“下一个节点”抄给 <code>temp</code>（现在是 <b>${vOld}</b>）。<br><span class="warn">为什么必须先做这一步？</span>因为下一行马上就要把 <code>cur.next</code> 覆盖掉，不先存档就永远找不到后面的路了。这一步<b>不改变链表结构</b>，链表仍然是 <b>${chainText(st[st.length-1].next, vals, 0)}</b>。` });
+
+    /* -------- ② cur.next = prev -------- */
+    next = next.slice();
+    next[c] = prev;
+    const toText = prev === NL ? 'null' : vals[prev];
+    snap({ kind:'link', lines:[8], round, changed:'link', act:`${vCur}.next 指向 ${toText}`,
+      desc:`【② 真正改链表】<code>cur.next = prev;</code><br>左边带 <b>“.”</b>，这才是<b>写入节点内部</b>：把 <b>${vCur}</b> 的 next 从原来的 <b>${vOld}</b> 改成 <b>${toText}</b>。<br>整个循环里<b>只有这一行会改变链表</b>。原来的箭头 ${vCur} → ${vOld} 应声而断（图中红色虚线），新的箭头 ${vCur} → ${toText} 画出来（绿色实线）。` });
+
+    /* -------- ③ prev = cur -------- */
+    prev = c;
+    snap({ kind:'adv', lines:[9], round, changed:'prev', act:`prev 前进到 ${vCur}`,
+      desc:`【③ 搬游标】<code>prev = cur;</code><br>右边<b>没有“.”</b>，所以这只是把引用复制一份，让 <code>prev</code> 也指向 <b>${vCur}</b> 这个节点，<b>完全不碰节点内部</b>。意义是：已反转段的头向前长了一格，现在是 <b>${valueChain(next, vals, prev)} → null</b>。<br><span class="warn">如果把它提到 ② 之前</span>，② 就变成 <code>cur.next = cur;</code>，节点指向自己形成自环 —— 顺序不能换。` });
+
+    /* -------- ④ cur = temp -------- */
+    cur = temp;
+    snap({ kind:'mvc', lines:[10], round, changed:'cur', act:`cur 前进到 ${temp === NL ? 'null' : vals[temp]}`,
+      desc:`【④ 搬游标】<code>cur = temp;</code><br>同样没有“.”，只是让 <code>cur</code> 前进到刚才存下来的那个节点（<b>${temp === NL ? 'null' : vals[temp]}</b>）。<br>到此一轮结束：<b>cur = ${temp === NL ? 'null' : vals[temp]}</b>、<b>prev = ${vCur}</b>、<b>temp = ${temp === NL ? 'null' : vals[temp]}</b>。下一轮将对 ${temp === NL ? '—' : vals[temp]} 重复同样的四步。` });
+  }
+
+  snap({ kind:'end', lines:[6,14], round:n, result:true, changed:null,
+    act:`cur 变成 null → 退出循环，return prev`,
+    desc:`<b>cur = null</b>，<code>while (cur != null)</code> 条件不成立，循环结束。<br>执行 <b>return prev</b>：<code>prev</code> 停在原来的尾节点 <b>${vals[n-1]}</b> 上，它就是反转后的新头节点。最终链表：<b>${chainText(next, vals, prev)}</b>。<br>注意<b>不能返回 cur</b> —— 循环结束时 cur 已经是 null 了。` });
+
+  return st;
+}
+
+/* 从某个节点出发，把 next 链渲染成 “1 → 2 → 3” 这样的文字 */
+function valueChain(next, vals, head){
+  if (head === NL || head === -1 || head === undefined || head === null) return '';
+  const ids = listChain(next, head);
+  return ids.map(i => vals[i]).join(' → ');
+}
+/* 一整条链表，末尾补 null */
+function chainText(next, vals, head){
+  const body = valueChain(next, vals, head);
+  return body === '' ? 'null' : body + ' → null';
+}
+
+/* 反转过程中，链表会裂成「prev 段」和「cur 段」两截。
+   这里拼出这一步完整的数据结构（从没人指向的节点开始读），用来给学习者一个总览。 */
+function fullChain(next, vals){
+  const n = vals.length;
+  if (!n) return 'null';
+  const pointed = new Set();
+  for (let i = 0; i < n; i++) if (next[i] !== NL) pointed.add(next[i]);
+  const heads = [];
+  for (let i = 0; i < n; i++) if (!pointed.has(i)) heads.push(i);
+  if (!heads.length) return '（环）';
+  return heads.map(h => valueChain(next, vals, h) + ' → null').join('   ｜   ');
+}
+
+/* ---------- 运行时状态 ---------- */
+let vals = [], states = [], idx = 0, timer = null, laneH = 0;
+let inputError = '';
+
+/* ---------- 节点排版 ---------- */
+function layoutNodes(){
+  const n = vals.length;
+  nodesEl.innerHTML = '';
+  for (let i = 0; i < n; i++){
+    const d = document.createElement('div');
+    d.className = 'node'; d.dataset.id = i;
+    d.innerHTML = `<span class="cap">节点 ${i}</span>
+                   <div class="box"><span class="v">${esc(String(vals[i]))}</span><span class="nx">next</span></div>`;
+    nodesEl.appendChild(d);
+  }
+  const d = document.createElement('div');
+  d.className = 'node'; d.dataset.id = 'null';
+  d.innerHTML = `<span class="cap">链尾</span><div class="box null">null<small>空指针</small></div>`;
+  nodesEl.appendChild(d);
+}
+
+function stepInfo(){
+  const s = states[idx];
+  if (s.kind === 'end') return { badge:'结束', text:`第 ${idx} / ${states.length-1} 步 · 执行完毕` };
+  if (s.kind === 'init') return { badge:'初始化', text:`第 ${idx} / ${states.length-1} 步 · 初始化` };
+  return { badge:`第 ${s.round} 轮`, text:`第 ${idx} / ${states.length-1} 步 · 第 ${s.round} 轮` };
+}
+
+/* ---------- 画箭头 ---------- */
+/*
+  每条 next 指向都画成一条弧线：
+    仍然存在的指向 → 绿色实线（带箭头）
+    已经被改掉的旧指向 → 红色虚线（淡出，用来“看见”它被拆掉）
+  弧线按跨度分道，避免互相压住。
+*/
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+function centerOf(id){
+  const sel = id === NL ? '.node[data-id="null"]' : `.node[data-id="${id}"]`;
+  const el = nodesEl.querySelector(sel);
+  if (!el) return null;
+  const box = el.querySelector('.box');
+  const r = box.getBoundingClientRect();
+  return { x: r.left + r.width/2, y: r.top + r.height, h: r.height, w: r.width };
+}
+
+function drawArrows(prevState){
+  const s = states[idx];
+  const changed = s.changed;
+
+  /* 跑道高度只增不减：保证足够深，且播放过程中不会忽高忽低地抖 */
+  if (laneH < LANE_H){ laneH = LANE_H; }
+  lanesEl.style.height = laneH + 'px';
+  laneSvg.setAttribute('height', laneH);
+  const lane0 = lanesEl.getBoundingClientRect();
+
+  /* --- 这一步需要哪些箭头 --- */
+  const live = [];
+  for (let i = 0; i < s.next.length; i++) live.push({ key:`L${i}`, from:i, to:s.next[i] });
+
+  const dead = [];
+  s.orig.forEach((to, i) => {
+    if (to === NL) return;              // 指向 null 的原始箭头不画，避免整行横穿
+    if (s.next[i] !== to) dead.push({ key:`D${i}`, from:i, to });
+  });
+
+  /* --- 与上一帧对比，判断谁是新出现的 --- */
+  const prevLive = prevState ? new Set(prevState.next.map((t, i) => `L${i}`)) : new Set();
+  const prevDead = prevState
+    ? new Set([...prevState.orig.entries()].filter(([i, t]) => t !== NL && prevState.next[i] !== t).map(([i]) => `D${i}`))
+    : new Set();
+
+  /* --- 计算弧线，按“跨度越大越靠外”分道，避免互相压住 --- */
+  const items = [];
+  live.forEach(a => items.push(Object.assign({ type:'live' }, a)));
+  dead.forEach(a => items.push(Object.assign({ type:'dead' }, a)));
+
+  const prepared = [];
+  for (const a of items){
+    const p = centerOf(a.from), q = centerOf(a.to);
+    if (!p || !q) continue;
+    prepared.push(Object.assign({}, a, { p, q }));
+  }
+  prepared.sort((m, n) => Math.abs(m.p.x - m.q.x) - Math.abs(n.p.x - n.q.x));   // 短跨度 → 内侧道
+  /* 现役箭头用浅层跑道，被拆掉的旧箭头走更深处（少而醒目，且不会把跑道撑得过高） */
+  let li = 0, di = 3;
+  prepared.forEach(a => {
+    a.lane = a.type === 'live' ? (li++ % 3) : (di++ % 3 + 3);
+    a.isNew = a.type === 'live' ? !prevLive.has(a.key) : !prevDead.has(a.key);
+  });
+
+  /* --- 生成 path --- */
+  /* 竖直分工：节点盒 → 指针胶囊 → 箭头跑道，三者不重叠 */
+  const ARROW_TOP = 52, LABEL_Y = 30, STEP = 26;
+  let maxReach = 0, built = 0;
+  const paths = prepared.map(a => {
+    const anchor = (id, side) => {                    // side: -1 左端 / +1 右端 / 0 中心
+      const c = centerOf(id);
+      if (!c) return null;
+      return { x: c.x + side * c.w / 2, y: c.y };
+    };
+    /* next 指向哪个节点，就从那个节点“有空间的一侧”进箭头，别压住盒子里的数字 */
+    const live = a.type === 'live';
+    const pStart = anchor(a.from, live ? 0.45 : 0);
+    const pEnd   = anchor(a.to, a.to === NL ? -1 : (live ? -0.45 : 0));
+    if (!pStart || !pEnd) return null;
+
+    const x1 = pStart.x - lane0.left, y1 = pStart.y - lane0.top + ARROW_TOP;
+    const x2 = pEnd.x - lane0.left,   y2 = pEnd.y - lane0.top + ARROW_TOP;
+    const span = Math.abs(x2 - x1);
+    const bow = Math.max(56, span * 0.5);              // 向下鼓的弧，保证不穿节点盒，短跨度也留出足够高度
+    const dy = bow + a.lane * STEP;
+    built++;
+    /* y1/y2 已经是跑道内的相对坐标，别再减 lane0.top（减了会得到负数）。
+       三次贝塞尔的曲线不会越过控制点，所以用控制点高度当所需深度的上界最稳妥。 */
+    maxReach = Math.max(maxReach, Math.max(y1, y2) + dy + 12);
+
+    const d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${(y1 + dy).toFixed(1)}, ` +
+              `${x2.toFixed(1)} ${(y2 + dy).toFixed(1)}, ${x2.toFixed(1)} ${(y2 - 6).toFixed(1)}`;
+    const isCur = live && a.from === s.cur;
+    return `<path data-key="${a.key}" class="${a.type}"
+      d="${d}" stroke="${live ? '#6fe3a2' : '#ff7b7b'}"
+      stroke-width="${live ? (changed === 'link' && isCur ? 3.6 : 2.6) : 1.7}"
+      ${live ? '' : 'stroke-dasharray="7 5"'}
+      marker-end="url(#${live ? 'ah' : 'ahd'})"></path>`;
+  }).filter(Boolean).join('');
+
+  /* 跑道高度按本步实际需要算，长链表也不会顶出面板（只增不减，避免播放时抖动） */
+  const needH = Math.max(built ? maxReach : 0, 120);
+  if (needH > laneH){
+    laneH = needH;
+    lanesEl.style.height = laneH + 'px';
+    laneSvg.setAttribute('height', laneH);
+  }
+  laneSvg.setAttribute('width', lanesEl.scrollWidth || 1200);
+
+  laneSvg.innerHTML = `<defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#6fe3a2"></path>
+      </marker>
+      <marker id="ahd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff7b7b"></path>
+      </marker>
+    </defs><g>` + paths + '</g>';
+
+  /* --- 动画：新绿箭头“画出来”，被拆掉的旧箭头“爆开” --- */
+  laneSvg.querySelectorAll('path.live').forEach(p => {
+    const isNew = prepared.find(a => a.key === p.dataset.key && a.isNew);
+    if (isNew && changed === 'link'){
+      const len = p.getTotalLength();
+      if (len){
+        p.style.transition = 'none';
+        p.style.strokeDasharray = `${len}`;
+        p.style.strokeDashoffset = `${len}`;
+        p.getBoundingClientRect();                       // 强制回流，让起点生效
+        p.style.transition = 'stroke-dashoffset .55s ease-out';
+        p.style.strokeDashoffset = '0';
+        requestAnimationFrame(() => { p.style.strokeDashoffset = '0'; });
+      }
+    }
+  });
+  if (changed === 'link'){
+    laneSvg.querySelectorAll('path.dead').forEach(p => {
+      if (!prepared.find(a => a.key === p.dataset.key && a.isNew)) return;
+      p.animate(
+        [{ opacity: 1, strokeWidth: 4.5, stroke: '#ff9d9d' },
+         { opacity: 1, strokeWidth: 1.7, stroke: '#ff7b7b' }],
+        { duration: 750, easing: 'ease-out' }
+      );
+    });
+  }
+
+  /* --- 指针落点标签 --- */
+  const labels = [];
+  const place = (label, id, cls) => {
+    const c = centerOf(id);
+    if (!c) return;
+    labels.push(`<span class="lbl ${cls}" style="left:${(c.x - lane0.left).toFixed(1)}px;top:${(c.y - lane0.top + LABEL_Y).toFixed(1)}px">${label}</span>`);
+  };
+  place('prev', s.prev, 'prev');
+  place('cur',  s.cur,  'cur');
+  if (s.temp !== -1) place('temp', s.temp, 'temp');
+  labelsEl.innerHTML = labels.join('');
+}
+
+/* ---------- 三根指针的格子带 ---------- */
+function renderRefStrip(s){
+  const n = vals.length;
+  const cols = n + 1;                            // 最后一列 = null
+  const head = `<div class="rowname"></div><div class="cells refcellrow">` +
+    Array.from({length:cols}, (_,i) =>
+      `<div class="rcell"><span class="cap">${i < n ? '节点 ' + i : 'null'}</span><span class="cap" style="font-size:10px">${i < n ? esc(String(vals[i])) : '∅'}</span></div>`
+    ).join('') + `</div>`;
+
+  const row = (name, ref, cls, changedName) => {
+    const idx0 = ref === NL ? n : ref;
+    const changed = s.changed === changedName;
+    const cells = Array.from({length:cols}, (_,i) => {
+      const hit = i === idx0;
+      const txt = hit ? name : '·';
+      return `<div class="rcell" style="padding-top:6px"><span class="cell ${cls}${hit && changed ? ' changed' : ''}">${txt}</span></div>`;
+    }).join('');
+    return `<div class="rowname">${name}</div><div class="cells">${cells}</div>`;
+  };
+
+  refstripEl.innerHTML = head
+    + row('cur',  s.cur,  'c-col', 'cur')
+    + row('prev', s.prev, 'p-col', 'prev')
+    + row('temp', s.temp === -1 ? -1 : s.temp, 't-col', 'temp');
+}
+
+/* ---------- 主渲染 ---------- */
+/* 只在容器内部滚动，避免把整个页面顶跑（scrollIntoView 会连 document 一起滚） */
+function scrollInside(wrap, el, pad){
+  if (!wrap || !el) return;
+  const wt = wrap.getBoundingClientRect().top, et = el.getBoundingClientRect().top;
+  const top = et - wt + wrap.scrollTop - (pad || 0);
+  const bottom = top + el.offsetHeight + (pad || 0) * 2;
+  if (top < wrap.scrollTop) wrap.scrollTop = Math.max(0, top);
+  else if (bottom > wrap.scrollTop + wrap.clientHeight) wrap.scrollTop = bottom - wrap.clientHeight;
+}
+
+function render(){
+  const s = states[idx];
+
+  /* 代码高亮 */
+  codeEl.querySelectorAll('.line').forEach(el => {
+    const ln = +el.dataset.line;
+    el.classList.toggle('active', s.lines.includes(ln));
+    el.classList.toggle('done', ln < Math.max(...s.lines) && !s.lines.includes(ln));
+  });
+
+  /* 节点高亮：每种指针组合对应一套颜色，直接写内联样式，避免层叠歧义 */
+  const PALETTE = {
+    none: ['#3f6285', 'transparent',            '#132943', '#dbeaff'],
+    cur:  ['#ffb45b', 'rgba(255,180,91,.18)',   'rgba(255,180,91,.18)', '#ffd9a6'],
+    prev: ['#6fe3a2', 'rgba(111,227,162,.16)',  'rgba(111,227,162,.16)', '#b6f5d3'],
+    temp: ['#ff7eac', 'rgba(255,126,172,.16)',  'rgba(255,126,172,.16)', '#ffc3d8'],
+  };
+  const RING = { prev:'rgba(111,227,162,.55)', temp:'rgba(255,126,172,.55)' };
+
+  function paintNode(el, state){
+    const box = el.querySelector('.box');
+    if (!box) return;
+    if (el.dataset.id === 'null'){                 // null 盒子只点亮边框
+      if (state !== 'none'){
+        const c = state === 'cur' ? '#ffb45b' : (state === 'prev' ? '#6fe3a2' : '#ff7eac');
+        box.style.borderColor = c; box.style.boxShadow = `0 0 0 3px ${c}`;
+      } else {
+        box.style.borderColor = ''; box.style.boxShadow = '';
+      }
+      return;
+    }
+    const p = PALETTE[state] || PALETTE.none;
+    box.style.borderColor = p[0];
+    box.style.background  = p[2];
+    box.style.color       = p[3];
+    const primary = state.split('+').filter(k => k !== 'none')[0];
+    const rings = state.split('+').filter(k => RING[k]);
+    box.style.boxShadow = (primary ? `0 0 0 3px ${PALETTE[primary][0]}` : 'none') +
+                          rings.map(k => `, 0 0 0 6px ${RING[k]}`).join('');
+  }
+
+  /* 节点高亮 */
+  nodesEl.querySelectorAll('.node').forEach(el => {
+    el.className = 'node';
+    const id = el.dataset.id === 'null' ? NL : +el.dataset.id;
+    const keys = [];
+    if (id === s.cur)  keys.push('cur');
+    if (id === s.prev) keys.push('prev');
+    if (s.temp !== -1 && id === s.temp) keys.push('temp');
+    /* 主角优先显示为 cur 的颜色，其余指针用外圈描边表示 */
+    const state = keys.length ? keys.sort(k => (k === 'cur' ? -1 : 1)).join('+') : 'none';
+    paintNode(el, state);
+  });
+  /* 本步主角跳动一下 */
+  const flashId = s.changed === 'link' ? s.cur : (s.changed === 'temp' ? s.temp : (s.changed === 'cur' ? s.cur : s.prev));
+  const flashEl = nodesEl.querySelector(`.node[data-id="${flashId === NL ? 'null' : flashId}"]`);
+  if (flashEl && idx > 0){ flashEl.classList.remove('flash'); void flashEl.offsetWidth; flashEl.classList.add('flash'); }
+
+  const txt = v => v === NL ? 'null' : vals[v];
+  $('vCur').textContent  = s.kind === 'init' ? `${vals.length ? vals[0] : 'null'}` : txt(s.cur);
+  $('vPrev').textContent = txt(s.prev);
+  $('vTemp').textContent = s.temp === -1 ? '—（还没用）' : txt(s.temp);
+  $('dCur').textContent  = s.cur === NL ? '指向 null → 循环将退出' : `下标 ${s.cur}`;
+  $('dPrev').textContent = s.prev === NL ? 'null（已反转段为空）' : `已反转段的头：${valueChain(s.next, vals, s.prev)}`;
+  $('dTemp').textContent = s.temp === -1 ? '① 之后才会被赋值' : (s.temp === NL ? 'null（原来后面没人了）' : `存档：节点 ${vals[s.temp]}`);
+  $('vList').textContent = fullChain(s.next, vals);
+  const headReach = valueChain(s.next, vals, 0) || 'null';
+  const isDone = idx === states.length - 1;
+  $('dList').textContent = isDone
+    ? '已完成：整条链表只有一截，方向全部反过来了。'
+    : (vals.length ? `从原来的头节点（${vals[0]}）出发只剩：${headReach}　·　被断开的那截由 prev 掌着` : '');
+
+  ['boxCur','boxPrev','boxTemp'].forEach(id => $(id).classList.remove('hot'));
+  if (s.changed === 'cur')  $('boxCur').classList.add('hot');
+  if (s.changed === 'prev') $('boxPrev').classList.add('hot');
+  if (s.changed === 'temp') $('boxTemp').classList.add('hot');
+
+  $('desc').innerHTML = s.desc;
+
+  const info = stepInfo();
+  $('stepTag').textContent = info.badge;
+  $('stageTag').textContent = `共 ${vals.length} 个节点`;
+  $('progressText').textContent = info.text;
+  $('bar').style.width = (states.length > 1 ? (idx / (states.length - 1)) * 100 : 100) + '%';
+
+  renderRefStrip(s);
+  drawArrows(idx > 0 ? states[idx-1] : null);
+  renderTable();
+  renderResult();
+
+  $('prev').disabled = idx === 0;
+  $('step').disabled = idx === states.length - 1;
+
+  /* 让当前高亮的代码行滚进视野（只在代码面板内部滚） */
+  const act = codeEl.querySelector('.line.active');
+  if (act) scrollInside(codeEl, act, 6);
+}
+
+/* ---------- 记录表 ---------- */
+function opOf(s){
+  switch (s.kind){
+    case 'init': return 'ListNode prev = null; / cur = head;';
+    case 'save': return 'temp = cur.next;';
+    case 'link': return 'cur.next = prev;';
+    case 'adv':  return 'prev = cur;';
+    case 'mvc':  return 'cur = temp;';
+    default:     return 'return prev;';
+  }
+}
+function lineOf(s){ return s.lines[s.lines.length - 1] + ''; }
+
+function renderTable(){
+  const rows = [];
+  states.forEach((s, i) => {
+    const prevS = i > 0 ? states[i-1] : null;
+    let note = '结构未变', isChg = false;
+    if (s.kind === 'link'){
+      const from = prevS ? (prevS.next[s.cur] === NL ? 'null' : vals[prevS.next[s.cur]]) : 'null';
+      const to   = s.next[s.cur] === NL ? 'null' : vals[s.next[s.cur]];
+      note = `${vals[s.cur]}.next：${from} → ${to}`;
+      isChg = true;
+    } else if (s.kind === 'end'){
+      note = `循环结束，链表已是 ${chainText(s.next, vals, s.prev)}`;
+    }
+    const T = v => v === -1 ? '—' : (v === NL ? 'null' : vals[v]);
+
+    rows.push(`<tr class="${i === idx ? 'cur' : ''}" data-i="${i}">
+      <td>${i}</td><td class="mono">${lineOf(s)}</td><td class="op">${esc(opOf(s))}</td>
+      <td class="cv">${s.kind === 'init' ? (vals.length ? vals[0] : 'null') : T(s.cur)}</td>
+      <td class="pv">${T(s.prev)}</td>
+      <td class="tv">${T(s.temp)}</td>
+      <td class="${isChg ? 'chg' : 'same'}">${esc(note)}</td>
+    </tr>`);
+  });
+  $('tbody').innerHTML = rows.join('');
+  const curRow = $('tbody').querySelector('tr.cur');
+  if (curRow) scrollInside(document.querySelector('.tablewrap'), curRow, 4);
+}
+
+function renderResult(){
+  if (idx < states.length - 1){
+    $('result').innerHTML = `反转完成后，返回值是 <b>prev</b>（原来的尾节点），因为它停在新链表的头部。当前进度第 ${idx} / ${states.length-1} 步。`;
+    return;
+  }
+  const s = states[states.length - 1];
+  if (!vals.length){
+    $('result').innerHTML = `空链表：直接 <b>return prev = null</b>。`;
+    return;
+  }
+  $('result').innerHTML = `执行完毕 · <b>return prev</b> → 新头节点是 <b>${vals[vals.length-1]}</b>，最终链表 <b>${chainText(s.next, vals, s.prev)}</b>（原始是 ${vals.join(' → ')}）。`;
+}
+
+/* ---------- 交互 ---------- */
+function stop(){
+  if (timer){ clearInterval(timer); timer = null; }
+  $('play').textContent = '▶ 自动播放';
+}
+function stepTo(i){
+  if (i < 0 || i >= states.length) return;
+  idx = i; render();
+}
+function next(){ if (idx < states.length - 1){ idx++; render(); } else stop(); }
+window.goToStep = i => { stop(); stepTo(i); };   // 便于外部/自动化直接跳步
+
+$('step').onclick = () => { stop(); next(); };
+$('prev').onclick = () => { stop(); stepTo(idx - 1); };
+$('reset').onclick = () => { stop(); idx = 0; build(); };
+$('play').onclick = () => {
+  if (timer){ stop(); return; }
+  if (idx >= states.length - 1) idx = 0;
+  $('play').textContent = '⏸ 暂停';
+  timer = setInterval(next, +$('speed').value);
+  render();
+};
+$('speed').onchange = () => { if (timer){ clearInterval(timer); timer = setInterval(next, +$('speed').value); } };
+$('input').oninput = () => { stop(); build(); };
+$('preset1').onclick = () => { stop(); $('input').value = '1,2,3,4,5'; build(); };
+$('preset2').onclick = () => { stop(); $('input').value = '7'; build(); };
+$('preset3').onclick = () => { stop(); $('input').value = ''; build(); };
+$('tbody').onclick = e => {
+  const tr = e.target.closest('tr[data-i]');
+  if (!tr) return;
+  stop(); stepTo(+tr.dataset.i);
+};
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight'){ e.preventDefault(); stop(); next(); }
+  if (e.key === 'ArrowLeft'){ e.preventDefault(); stop(); stepTo(idx - 1); }
+  if (e.key === ' '){ e.preventDefault(); $('play').click(); }
+});
+
+function parseVals(){
+  const raw = $('input').value.trim();
+  if (!raw) return [];
+  const parts = raw.split(/[,，\s]+/).filter(Boolean);
+  if (parts.length > 8) parts.length = 8;
+  const out = [];
+  for (const p of parts){
+    const v = p.trim();
+    if (!/^-?\d+$/.test(v)) continue;
+    out.push(v);
+  }
+  return out.map((v, i) => (v === '' ? String(i) : v));
+}
+
+function build(){
+  vals = parseVals();
+  states = buildStates(vals);
+  idx = 0;
+  laneH = 0;                       // 换链表后重新计算跑道高度
+  layoutNodes();
+  render();
+}
+window.addEventListener('resize', () => { if (states.length) render(); });
+
+build();
+</script>
+</body>
+</html>
